@@ -45,8 +45,8 @@ theme:
   
   palette:
     scheme: default
-    primary: indigo
-    accent: indigo
+    primary: teal
+    accent: teal
   font:
     text: SiyamRupali
     code: SiyamRupali
@@ -179,6 +179,7 @@ nav:
     - ইন্ডাস্ট্রি ট্রেন্ড: trend.md
     - বইয়ের সম্ভাব্য চ্যাপ্টার স্ট্রাকচার: contents1.md
     - অথবা শুধুমাত্র NSOT: contents2.md
+    - কেন NSoT ছাড়া স্কেল করা অসম্ভব: nsot_scale.md
 #     - উৎসর্গ: dedication.md
 #     - কৃতজ্ঞতা এবং বাড়তি রিডিং: courtesy.md
 # #    - কেন বইটা লিখতে চাইলাম?: why-writing.md
