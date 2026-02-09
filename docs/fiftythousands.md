@@ -1,235 +1,186 @@
-দুই বছর আগে SkyNet Bangladesh শুরু করেছিল মাত্র দুটো পপ নিয়ে - মিরপুর আর কল্যাণপুর। প্রায় পাঁচ হাজার কাস্টমার। তখন তারা Nautobot সেটআপ করেছিল। সেই পরিকল্পনা অনুযায়ী কাজ করেছে, সফল হয়েছে। এখন তাদের গ্রোথ হয়েছে। বর্তমানে নর্থ ঢাকায় তাদের আটটা পপ, প্রায় পঞ্চাশ হাজার কাস্টমার। আর সবচেয়ে বড় কথা - তারা এখনও সেই একই Nautobot সিস্টেম ব্যবহার করছে যেটা দুই বছর আগে সেটআপ করেছিল।
+দুই বছর আগে SkyNets Bangladesh শুরু করেছিল মাত্র দুটো পপ নিয়ে - মিরপুর এবং উত্তরা। প্রায় ৮ হাজার কাস্টমার। তখন তারা Nautobot সেটআপ করেছিল। সেই পরিকল্পনা অনুযায়ী কাজ করেছে, সফল হয়েছে।
 
-কিন্তু স্কেল বাড়ার সাথে সাথে নতুন চ্যালেঞ্জ এসেছে। এই চ্যাপ্টারে আমরা দেখব কীভাবে SkyNet সেই চ্যালেঞ্জগুলো সামলেছে, কী কী পরিবর্তন করেছে, আর কীভাবে Nautobot তাদের এই স্কেলিং জার্নিতে সাহায্য করেছে।
+এখন ২০২৭ সাল। SkyNets Bangladesh এর গ্রোথ হয়েছে বিশাল। বর্তমানে নর্থ ঢাকায় তাদের আটটা পপ, প্রায় পঞ্চাশ হাজার কাস্টমার। আর সবচেয়ে বড় কথা - তারা এখনও সেই একই Nautobot সিস্টেম ব্যবহার করছে যেটা দুই বছর আগে সেটআপ করেছিল।
 
-### বর্তমান পরিস্থিতি - ২০২৬ সালের গল্প
+কিন্তু স্কেল বাড়ার সাথে সাথে নতুন চ্যালেঞ্জ এসেছে। এই চ্যাপ্টারে আমরা দেখব কীভাবে SkyNets সেই চ্যালেঞ্জগুলো সামলেছে, কী কী পরিবর্তন করেছে, আর কীভাবে Nautobot তাদের এই স্কেলিং জার্নিতে সাহায্য করেছে।
 
-আজ থেকে দুই বছর আগে (২০২৪) যেখানে ছিল:
+### বর্তমান পরিস্থিতি - ২০২৭ সালের গল্প
 
-- ২টা পপ
-- ১৯টা ডিভাইস
-- ৫ হাজার কাস্টমার
+আজ থেকে দুই বছর আগে (২০২৫) যেখানে ছিল:
+- ২টা পপ (মিরপুর, উত্তরা)
+- ২০টা ডিভাইস
+- ৮ হাজার কাস্টমার
+- ৩ জন টেকনিক্যাল টিম
 
-এখন ২০২৬ সালে কোথায় এসেছে:
-
-- ৮টা পপ (ঢাকা নর্থ জোন জুড়ে)
-- ১২০+ ডিভাইস
+এখন ২০২৭ সালে কোথায় এসেছে:
+- ৮টা পপ (নর্থ ঢাকা জুড়ে)
+- ১৫০+ ডিভাইস
 - ৫০ হাজার কাস্টমার
-- ১৫ জন টেকনিক্যাল টিম
+- ১৮ জন টেকনিক্যাল টিম
 
-### নতুন পপগুলো
+#### নতুন পপগুলো
 
-মিরপুর আর কল্যাণপুরের পাশাপাশি নতুন ছয়টা পপ যুক্ত হয়েছে:
-
-১. **উত্তরা পপ** - সেক্টর ৭, উত্তরা (~৮ হাজার কাস্টমার)
-২. **বনানী পপ** - রোড ১১, বনানী (~৫ হাজার কাস্টমার)
-৩. **গুলশান পপ** - গুলশান-২ (~৭ হাজার কাস্টমার)
-৪. **মোহাম্মদপুর পপ** - টাউন হল রোড (~৬ হাজার কাস্টমার)
-৫. **ধানমন্ডি পপ** - রোড ২৭, ধানমন্ডি (~৮ হাজার কাস্টমার)
-৬. **বারিধারা পপ** - বারিধারা DOHS (~৪ হাজার কাস্টমার)
-
-প্রতিটা পপে:
-
-- ১টা কোর রাউটার
-- ২-৩টা ডিস্ট্রিবিউশন সুইচ
-- ১০-২০টা এক্সেস সুইচ
-
-### নতুন আপস্ট্রিম কানেকশন
-
-শুধু BTCL আর Summit না, এখন আরো যুক্ত হয়েছে:
-
-- **ফাইবার@হোম** - ব্যাকআপ কানেকশন
-- **সাইবারগেট** - কর্পোরেট ক্লায়েন্টদের জন্য ডেডিকেটেড
-- **আন্তঃপপ লিংক** - নিজেদের ফাইবার দিয়ে পপ-টু-পপ কানেকশন
-
-### প্রথম চ্যালেঞ্জ: স্ট্রাকচার রিঅর্গানাইজেশন
-
-৫ হাজার কাস্টমারের সময় সব ফ্ল্যাট স্ট্রাকচারে রাখা যেত। কিন্তু ৫০ হাজারে সেটা কাজ করে না। দরকার হায়ারার্কিক্যাল স্ট্রাকচার।
-
-### Location Hierarchy তৈরি করা
-
-আগে যেখানে শুধু পপ ছিল, এখন একটা হায়ারার্কি তৈরি করা হয়েছে:
+মিরপুর আর উত্তরার পাশাপাশি নতুন ছয়টা পপ যুক্ত হয়েছে:
 
 ```
-SkyNet Bangladesh
+১. কল্যাণপুর পপ - সেকশন ৩ (~৫ হাজার কাস্টমার)
+২. বনানী পপ - রোড ১১ (~৬ হাজার কাস্টমার)
+৩. গুলশান পপ - গুলশান-২ (~৮ হাজার কাস্টমার)
+৪. মোহাম্মদপুর পপ - টাউন হল রোড (~৭ হাজার কাস্টমার)
+৫. ধানমন্ডি পপ - রোড ২৭ (~৯ হাজার কাস্টমার)
+৬. বারিধারা পপ - বারিধারা DOHS (~৫ হাজার কাস্টমার)
+```
+
+প্রতিটা পপে:
+- ১টা কোর রাউটার
+- ২-৩টা ডিস্ট্রিবিউশন সুইচ
+- ১৫-২৫টা এক্সেস সুইচ
+
+#### নতুন আপস্ট্রিম কানেকশন
+
+শুধু BTCL না, এখন আরো যুক্ত হয়েছে:
+- **Summit Communications** - সেকেন্ডারি প্রোভাইডার
+- **BDCom** - ব্যাকআপ কানেকশন
+- **NovoTel** - কর্পোরেট ক্লায়েন্টদের জন্য ডেডিকেটেড
+- **ইন্টার-পপ লিংক** - নিজেদের ফাইবার দিয়ে পপ-টু-পপ কানেকশন
+
+### প্রথম চ্যালেঞ্জ: লোকেশন হায়ারার্কি রি-অর্গানাইজ করা
+
+৮ হাজার কাস্টমারের সময় সব ফ্ল্যাট স্ট্রাকচারে রাখা যেত। কিন্তু ৫০ হাজারে সেটা কাজ করে না। দরকার হায়ারার্কিক্যাল স্ট্রাকচার।
+
+#### আগের স্ট্রাকচার (২০২৫):
+
+```
+Dhaka North Zone
+  ├── Mirpur Cluster
+  │    └── Mirpur POP
+  └── Uttara Cluster
+       └── Uttara POP
+```
+
+#### নতুন স্ট্রাকচার (২০২৭):
+
+```
+SkyNets Bangladesh Network
   └── Dhaka North Zone
        ├── Mirpur Cluster
        │    ├── Mirpur POP
-       │    └── Kalyanpur POP
+       │    └── Kalyanpur POP (নতুন)
+       │
        ├── Uttara Cluster
        │    ├── Uttara POP
-       │    └── Baridhara POP
-       ├── Gulshan Cluster
+       │    └── Baridhara POP (নতুন)
+       │
+       ├── Gulshan Cluster (নতুন)
        │    ├── Gulshan POP
        │    └── Banani POP
-       └── Central Cluster
+       │
+       └── Central Cluster (নতুন)
             ├── Dhanmondi POP
             └── Mohammadpur POP
 ```
 
-এই স্ট্রাকচার Nautobot-এ কীভাবে তৈরি করবেন?
+এই হায়ারার্কি তৈরি করতে নতুন Cluster এবং POP locations যোগ করতে হয়েছে।
 
-**Location Types তৈরি করুন:**
+**Gulshan Cluster তৈরি:**
 
 ```
-1. Zone
-   - Name: Zone (Dhaka North Zone)
-   - Description: Geographic zone
-   - Nestable: ✓
-
-2. Cluster
-   - Name: Cluster
-   - Description: Group of nearby POPs
-   - Nestable: ✓
-   - Parent: Zone
-
-3. POP
-   - Name: POP
-   - Description: Point of Presence
-   - Nestable: ✗
-   - Parent: Cluster
-```
-
-**এখন Location তৈরি করুন:**
-
-Top Level:
-```
-Name: Dhaka North Zone
-Location Type: Zone
-Status: Active
-Description: Northern Dhaka coverage area
-```
-
-Clusters:
-```
-Name: Mirpur Cluster
-Location Type: Cluster
-Parent: Dhaka North Zone
-Description: Mirpur and Kalyanpur area coverage
-
-Name: Uttara Cluster
-Location Type: Cluster
-Parent: Dhaka North Zone
+Organization → Locations → + Add
 
 Name: Gulshan Cluster
 Location Type: Cluster
 Parent: Dhaka North Zone
-
-Name: Central Cluster
-Location Type: Cluster
-Parent: Dhaka North Zone
+Status: Active
+Description: Gulshan and Banani area coverage - high-value residential and commercial zone
 ```
 
-এখন প্রতিটা পপকে তার Cluster-এর আন্ডারে রাখুন:
+**Gulshan POP তৈরি:**
 
 ```
-Name: Mirpur POP
+Name: Gulshan POP
 Location Type: POP
-Parent: Mirpur Cluster
-
-Name: Kalyanpur POP
-Location Type: POP
-Parent: Mirpur Cluster
-
-Name: Uttara POP
-Location Type: POP
-Parent: Uttara Cluster
-... এভাবে সবগুলো
+Parent: Gulshan Cluster
+Physical Address: House 45, Road 11, Block CEN(A), Gulshan-2, Dhaka-1212
+Latitude: 23.7925
+Longitude: 90.4078
+Contact Name: Salman Ahmed
+Contact Phone: +880 1811-987654
+Time Zone: Asia/Dhaka
+Description: Premium POP serving Gulshan-2 area. 8000 customers, mostly high-bandwidth corporate and residential.
+Comments:
+  - Established: March 2026
+  - Building: 5-story commercial building, 3rd floor
+  - Fiber Routes: Dual path to Mirpur and Uttara POPs
+  - Backup Power: 100 KVA generator + 2 hours UPS
 ```
 
-এই হায়ারার্কি তৈরি হয়ে গেলে রিপোর্টিং অনেক সহজ হয়। যেমন "Mirpur Cluster-এ মোট কয়টা ডিভাইস?" - এক ক্লিকে উত্তর পাবেন।
+একইভাবে বাকি পপগুলো যোগ করা হয়েছে।
+
+#### হায়ারার্কি এর সুবিধা
+
+এখন রিপোর্টিং অনেক সহজ:
+
+**প্রশ্ন:** "Gulshan Cluster এ মোট কয়টা ডিভাইস?"
+
+**উত্তর:** Devices → Devices → Filters → Location: Gulshan Cluster → দেখাবে সব ডিভাইস (গুলশান পপ + বনানী পপ)
+
+**প্রশ্ন:** "Central Cluster এ কতটা আইপি ব্যবহৃত হচ্ছে?"
+
+**উত্তর:** IPAM → Prefixes → Filter by Location: Central Cluster → utilization দেখুন
 
 ### দ্বিতীয় চ্যালেঞ্জ: ডিভাইস নেমিং স্কেল করা
 
 আগের নেমিং কনভেনশন ছিল:
-```
-[Type]-[Site]-[Role]-[Number]
-উদাহরণ: R-MIR-CORE-01
-```
 
-এটা ভালো কাজ করছিল যখন দুটো সাইট ছিল। কিন্তু এখন আটটা সাইট, আর ভবিষ্যতে হয়তো বিশটা হবে। তাই নেমিং কনভেনশন আপডেট করা হয়েছে:
-
-**নতুন কনভেনশন:**
 ```
 [Type]-[Zone]-[Site]-[Role]-[Number]
-
-Zone Codes:
-  DN = Dhaka North
-  DS = Dhaka South (ভবিষ্যতের জন্য)
-  CT = Chittagong (ভবিষ্যতের জন্য)
-
-Site Codes (3 letter):
-  MIR = Mirpur
-  KAL = Kalyanpur
-  UTT = Uttara
-  BAN = Banani
-  GUL = Gulshan
-  MOH = Mohammadpur
-  DHA = Dhanmondi
-  BAR = Baridhara
-
-উদাহরণ:
-  R-DN-MIR-CORE-01 = Router, Dhaka North, Mirpur, Core, #1
-  R-DN-UTT-CORE-01 = Router, Dhaka North, Uttara, Core, #1
-  SW-DN-GUL-ACC-15 = Switch, Dhaka North, Gulshan, Access, #15
+উদাহরণ: R-DN-MIR-CORE-01
 ```
 
-কিন্তু সমস্যা হলো পুরোনো ডিভাইসগুলো আগের নেমিং-এ আছে। সেগুলো কী করবেন?
+এটা ভালো কাজ করছিল যখন দুটো সাইট ছিল। কিন্তু এখন আটটা সাইট। তাই নেমিং আপডেট করা হয়েছে:
 
-### বাল্ক রিনেম স্ট্রাটেজি
-
-সব পুরোনো ডিভাইসকে একসাথে রিনেম করা দরকার। Nautobot UI থেকে একটা একটা করে করা সম্ভব না। এজন্য Python স্ক্রিপ্ট লিখতে হবে।
-
-প্রথমে সব ডিভাইস Export করুন CSV-তে। Excel-এ ওপেন করুন। একটা নতুন কলাম `new_name` যোগ করুন। Formula দিয়ে নতুন নাম জেনারেট করুন:
+#### নতুন সাইট কোড:
 
 ```
-Old: R-MIR-CORE-01
-New: R-DN-MIR-CORE-01
+MIR = Mirpur
+UTT = Uttara
+KAL = Kalyanpur
+BAN = Banani
+GUL = Gulshan
+MOH = Mohammadpur
+DHA = Dhanmondi
+BAR = Baridhara
 ```
 
-তারপর এই CSV দিয়ে আপডেট করুন। অথবা একটা Python স্ক্রিপ্ট:
+#### উদাহরণ:
 
-```python
-from pynautobot import api
-
-# Nautobot connection
-nb = api(url="https://nautobot.skynet.bd", token="your-token")
-
-# সব Mirpur ডিভাইস নিয়ে আসুন
-devices = nb.dcim.devices.filter(location="Mirpur POP")
-
-for device in devices:
-    old_name = device.name
-    # R-MIR-CORE-01 -> R-DN-MIR-CORE-01
-    if old_name.startswith("R-MIR-"):
-        new_name = old_name.replace("R-MIR-", "R-DN-MIR-")
-    elif old_name.startswith("SW-MIR-"):
-        new_name = old_name.replace("SW-MIR-", "SW-DN-MIR-")
-    else:
-        continue
-    
-    print(f"Renaming: {old_name} -> {new_name}")
-    device.name = new_name
-    device.save()
+```
+R-DN-GUL-CORE-01 = Router, Dhaka North, Gulshan, Core, #1
+SW-DN-DHA-DIST-02 = Switch, Dhaka North, Dhanmondi, Distribution, #2
+SW-DN-BAR-ACC-18 = Switch, Dhaka North, Baridhara, Access, #18
 ```
 
-এভাবে সব সাইটের জন্য চালান। কিন্তু **সাবধান**: প্রথমে একটা ব্যাকআপ নিন। তারপর ছোট একটা ব্যাচে টেস্ট করুন।
+#### পুরোনো ডিভাইস রিনেম করা
+
+সমস্যা হলো পুরোনো ডিভাইসগুলো আগের নেমিং-এ আছে। সেগুলো রিনেম করতে হয়েছে ম্যানুয়ালি (UI থেকে) বা API দিয়ে bulk rename।
+
+ছোট সংখ্যক ডিভাইস হলে UI থেকে এক এক করে এডিট করা যায়। কিন্তু ১৫০+ ডিভাইস হলে API/script ভালো।
 
 ### তৃতীয় চ্যালেঞ্জ: IP Address Management স্কেলিং
 
-৫ হাজার কাস্টমারের সময় যে /22 পাবলিক ব্লক ছিল সেটা যথেষ্ট ছিল। কিন্তু ৫০ হাজারে সেটা শেষ হয়ে গেছে। নতুন আইপি ব্লক এসেছে।
+৮ হাজার কাস্টমারের সময় যে /22 পাবলিক ব্লক ছিল সেটা যথেষ্ট ছিল। কিন্তু ৫০ হাজারে সেটা শেষ হয়ে গেছে। নতুন আইপি ব্লক এসেছে।
 
-### পুরোনো আইপি স্ট্রাকচার (২০২৪):
+#### পুরোনো আইপি স্ট্রাকচার (২০২৫):
 
 ```
 103.125.40.0/22 (1024 IPs)
   ├─ 103.125.40.0/24 - Residential Mirpur
-  ├─ 103.125.41.0/24 - Residential Kalyanpur
+  ├─ 103.125.41.0/24 - Residential Uttara
   ├─ 103.125.42.0/25 - Corporate
   └─ 103.125.42.128/25 - Infrastructure
 ```
 
-### নতুন আইপি স্ট্রাকচার (২০২৬):
+#### নতুন আইপি স্ট্রাকচার (২০২৭):
 
 আরো তিনটা /22 ব্লক এলোকেট হয়েছে:
 
@@ -243,72 +194,71 @@ for device in devices:
 এখন এগুলোকে সুন্দর করে অর্গানাইজ করা হয়েছে:
 
 ```
-Parent: 103.125.40.0/21 (Aggregate - সব ব্লক মিলে)
+Parent: 103.125.40.0/20 (Aggregate - সব ব্লক মিলে)
+  │
   ├─ 103.125.40.0/22 - Mirpur/Kalyanpur Cluster
   │    ├─ 103.125.40.0/24 - Mirpur Residential
   │    ├─ 103.125.41.0/24 - Kalyanpur Residential
-  │    ├─ 103.125.42.0/24 - Mirpur Corporate
+  │    ├─ 103.125.42.0/24 - Corporate (Mirpur/Kalyanpur)
   │    └─ 103.125.43.0/24 - Infrastructure
   │
   ├─ 103.125.44.0/22 - Uttara/Baridhara Cluster
   │    ├─ 103.125.44.0/24 - Uttara Residential
   │    ├─ 103.125.45.0/24 - Baridhara Residential
-  │    ├─ 103.125.46.0/24 - Uttara Corporate
+  │    ├─ 103.125.46.0/24 - Corporate (Uttara/Baridhara)
   │    └─ 103.125.47.0/24 - Reserved
   │
   ├─ 103.125.48.0/22 - Gulshan/Banani Cluster
-  │    └─ ... (similar breakdown)
+  │    ├─ 103.125.48.0/24 - Gulshan Residential
+  │    ├─ 103.125.49.0/24 - Banani Residential
+  │    ├─ 103.125.50.0/24 - Corporate (Premium zone)
+  │    └─ 103.125.51.0/24 - Reserved
   │
   └─ 103.125.52.0/22 - Central Cluster + Future
-       └─ ... (similar breakdown)
+       ├─ 103.125.52.0/24 - Dhanmondi Residential
+       ├─ 103.125.53.0/24 - Mohammadpur Residential
+       ├─ 103.125.54.0/24 - Corporate (Central)
+       └─ 103.125.55.0/24 - Future Expansion
 ```
 
-এই স্ট্রাকচার Nautobot-এ ইমপ্লিমেন্ট করতে:
+#### IP Utilization Monitoring
 
-১. **Aggregate তৈরি করুন** (যদি Nautobot ভার্সন সাপোর্ট করে):
+৫০ হাজার কাস্টমারে আইপি ইউটিলাইজেশন ট্র্যাক করা অত্যন্ত জরুরি।
 
-```
-Prefix: 103.125.40.0/21
-Type: Container
-Description: SkyNet Bangladesh - All Public IP Blocks
-```
-
-২. **প্রতিটা /22 ব্লক:**
+**IPAM → Prefixes** লিস্টে গেলে দেখবেন:
 
 ```
-Prefix: 103.125.40.0/22
-Parent: 103.125.40.0/21
-Type: Container
-Location: Mirpur Cluster
-Description: Mirpur/Kalyanpur IP allocation
+103.125.40.0/24 - 92% utilized (236/256 IPs used) - ⚠️ Almost Full
+103.125.44.0/24 - 68% utilized (174/256 IPs used) - ✓ Healthy
+103.125.48.0/24 - 45% utilized (115/256 IPs used) - ✓ Good
 ```
 
-৩. **Child prefixes সাইট অনুযায়ী:**
+যখন কোনো প্রিফিক্স ৮০% এর বেশি ইউটিলাইজড হয়, তখন alert তৈরি করুন। নতুন প্রিফিক্স রিকোয়েস্ট করুন।
+
+#### Private IP Management
+
+পাবলিক আইপি ছাড়াও প্রাইভেট আইপি স্ট্রাকচার বড় হয়েছে:
 
 ```
-Prefix: 103.125.40.0/24
-Parent: 103.125.40.0/22
-Type: Network
-Location: Mirpur POP
-VLAN: RESIDENTIAL_MIR
-Description: Residential customers - Mirpur
+10.10.0.0/16 - SkyNets Internal Network
+  │
+  ├─ 10.10.1.0/24 - Loopbacks (all routers)
+  │    ├─ 10.10.1.1/32 - R-DN-MIR-CORE-01
+  │    ├─ 10.10.1.2/32 - R-DN-UTT-CORE-01
+  │    ├─ 10.10.1.3/32 - R-DN-GUL-CORE-01
+  │    └─ ... (সব কোর রাউটার)
+  │
+  ├─ 10.10.10.0/24 - Management - Mirpur POP
+  ├─ 10.10.11.0/24 - Management - Uttara POP
+  ├─ 10.10.12.0/24 - Management - Gulshan POP
+  ├─ 10.10.13.0/24 - Management - Banani POP
+  └─ ... (প্রতিটা পপের জন্য আলাদা /24)
 ```
 
-### IP Utilization Tracking
-
-৫০ হাজার কাস্টমারে আইপি ইউটিলাইজেশন ট্র্যাক করা অত্যন্ত জরুরি। Nautobot-এর Prefix লিস্টে গেলে দেখবেন প্রতিটা প্রিফিক্সের পাশে Utilization দেখাচ্ছে।
-
-যেমন:
-```
-103.125.40.0/24 - 87% utilized (223/256 IPs used)
-103.125.44.0/24 - 45% utilized (115/256 IPs used)
-```
-
-যখন কোনো প্রিফিক্স ৮০% এর বেশি ইউটিলাইজড হয়, তখন সতর্ক থাকুন। নতুন প্রিফিক্স প্ল্যান করুন।
-
-### VLAN Scaling
+### চতুর্থ চ্যালেঞ্জ: VLAN Scaling
 
 আগে ভিল্যান স্ট্রাকচার ছিল সিম্পল:
+
 ```
 VLAN 10: Management
 VLAN 100: Residential
@@ -320,14 +270,16 @@ VLAN 200: Corporate
 ```
 VLAN 10-19: Management (site-specific)
   - VLAN 10: MGMT_MIRPUR
-  - VLAN 11: MGMT_KALYANPUR
-  - VLAN 12: MGMT_UTTARA
+  - VLAN 11: MGMT_UTTARA
+  - VLAN 12: MGMT_GULSHAN
+  - VLAN 13: MGMT_BANANI
   ... ইত্যাদি
 
 VLAN 100-199: Residential (site-specific)
   - VLAN 100: RES_MIRPUR
-  - VLAN 101: RES_KALYANPUR
-  - VLAN 102: RES_UTTARA
+  - VLAN 101: RES_UTTARA
+  - VLAN 102: RES_GULSHAN
+  - VLAN 103: RES_BANANI
   ... ইত্যাদি
 
 VLAN 200-299: Corporate (সব সাইট শেয়ারড)
@@ -336,123 +288,67 @@ VLAN 200-299: Corporate (সব সাইট শেয়ারড)
   - VLAN 202: CORP_ENTERPRISE
 ```
 
-এই সব ভিল্যান Nautobot-এ CSV দিয়ে বাল্ক ইমপোর্ট করুন।
+এই সব ভিল্যান Nautobot এ CSV দিয়ে বাল্ক ইমপোর্ট করা হয়েছে।
 
-### চতুর্থ চ্যালেঞ্জ: Cable Management বাস্তবতা
+### পঞ্চম চ্যালেঞ্জ: Cable Management বাস্তবতা
 
-৫ হাজার কাস্টমারের সময় সব ক্যাবল ডকুমেন্ট করা সম্ভব ছিল। কিন্তু ৫০ হাজারে এসে বোঝা গেল প্রতিটা প্যাচ কর্ড ট্র্যাক করা impractical।
+৮ হাজার কাস্টমারের সময় সব ক্যাবল ডকুমেন্ট করা সম্ভব ছিল। কিন্তু ৫০ হাজারে এসে বোঝা গেল প্রতিটা প্যাচ কর্ড ট্র্যাক করা impractical।
 
-### Pragmatic Cable Management
+#### Pragmatic Cable Management Policy
 
-SkyNet একটা প্র্যাগম্যাটিক অ্যাপ্রোচ নিয়েছে:
+SkyNets একটা প্র্যাগম্যাটিক পলিসি বানিয়েছে:
 
-**ডকুমেন্ট করবেন:**
+**অবশ্যই ডকুমেন্ট করবেন:**
 - আপলিংক ক্যাবল (প্রোভাইডার টু কোর)
 - কোর টু ডিস্ট্রিবিউশন লিংক
 - ইন্টার-পপ ফাইবার লিংক
 - ক্রিটিক্যাল ব্যাকআপ লিংক
+- যেকোনো ৫০ মিটারের বেশি দৈর্ঘ্যের ক্যাবল
 
-**ডকুমেন্ট করবেন না:**
+**ডকুমেন্ট করতে হবে না:**
 - এক্সেস সুইচ টু কাস্টমার প্যাচ কর্ড
-- NOC-এর ইন্টারনাল প্যাচিং
+- NOC এর ইন্টারনাল প্যাচিং
 - টেম্পোরারি টেস্ট ক্যাবল
+- ২ মিটারের কম patch cables
 
-এই পলিসি ডকুমেন্ট করে রাখুন:
+এই পলিসি ডকুমেন্ট করে রাখা আছে এবং সব টিম মেম্বার জানে।
 
-```
-SkyNet Cable Documentation Policy
+### ষষ্ঠ চ্যালেঞ্জ: Multi-Team Collaboration
 
-Critical Cables (Must document):
-1. Uplink cables from providers
-2. Core to Distribution links
-3. Inter-POP fiber links
-4. Backup/redundancy links
-5. Any cable >50m length
+৮ হাজার কাস্টমারের সময় তিনজন টেকনিশিয়ান ছিল। এখন ১৮ জন। বিভিন্ন টিম:
 
-Non-Critical (Optional):
-1. Access to customer patch cords
-2. Internal NOC patching
-3. Management connections
-4. Temporary cables
-
-Update Frequency:
-- Critical: Immediate (same day)
-- Non-Critical: Monthly audit
-```
-
-### পঞ্চম চ্যালেঞ্জ: Multi-Team Collaboration
-
-৫ হাজার কাস্টমারের সময় তিনজন টেকনিশিয়ান ছিল। এখন ১৫ জন। বিভিন্ন টিম:
-
-**NOC Team (৫ জন):**
-
+**NOC Team (৬ জন):**
 - ২৪/৭ মনিটরিং
 - ইনসিডেন্ট রেসপন্স
 - কাস্টমার সাপোর্ট
 
-**Field Operations (৬ জন):**
-
+**Field Operations (৮ জন):**
 - নতুন কানেকশন ইনস্টলেশন
 - ফল্ট রিপেয়ার
 - সাইট মেইনটেন্যান্স
 
 **Network Engineering (৩ জন):**
-
 - নেটওয়ার্ক ডিজাইন
 - কনফিগারেশন ম্যানেজমেন্ট
 - ক্যাপাসিটি প্ল্যানিং
 
 **Management (১ জন):**
-
 - ওভারভিউ এবং রিপোর্টিং
 
-### Permission Structure
+#### Permission Structure
 
-এই টিমগুলোর জন্য আলাদা আলাদা পারমিশন:
+এই টিমগুলোর জন্য আলাদা আলাদা পারমিশন (আগের চ্যাপ্টারে দেখেছি)।
 
-**Group: NOC_Operators**
-```
-Permissions:
-- View: সবকিছু
-- Add/Edit: IP Addresses, Device Status
-- No Delete permission
-- No Provider/Circuit edit
-```
-
-**Group: Field_Technicians**
-```
-Permissions:
-- View: Devices, Cables, IPs
-- Add/Edit: Cables, Device Comments
-- Add: Devices (নতুন এক্সেস সুইচ)
-- No Delete, No IP allocation
-```
-
-**Group: Network_Engineers**
-```
-Permissions:
-- View: সবকিছু
-- Add/Edit/Delete: সব (Devices, IPs, Cables, Circuits)
-- Cannot: Delete Locations, Delete Providers
-```
-
-**Group: Management_ReadOnly**
-```
-Permissions:
-- View Only: সবকিছু
-- Export: Reports
-```
-
-### Collaboration Workflow
+#### Collaboration Workflow
 
 একটা স্ট্যান্ডার্ড ওয়ার্কফ্লো:
 
 **নতুন সাইট যুক্ত করার সময়:**
 
-১. **Network Engineer** নতুন সাইট প্ল্যান করে:
+১. **Network Engineer** নতুন সাইট প্ল্যান করে Nautobot এ:
    - Location তৈরি করে
    - IP allocation করে
-   - Device order দেয়
+   - Device types verify করে
 
 ২. **Field Team** সাইট সেটআপ করে:
    - ডিভাইস ইনস্টল করে
@@ -465,311 +361,187 @@ Permissions:
    - IP assign করে
 
 ৪. **NOC Team** যাচাই করে:
-   - সব ডিভাইস Nautobot-এ আছে কিনা
+   - সব ডিভাইস Nautobot এ আছে কিনা
    - Monitoring সেটআপ হয়েছে কিনা
-
-### ষষ্ঠ চ্যালেঞ্জ: Performance এবং Response Time
-
-১২০+ ডিভাইস, ৮টা সাইট, হাজার হাজার আইপি - Nautobot UI কি স্লো হয়ে যাবে?
-
-### Performance Optimization
-
-SkyNet কিছু optimization করেছে:
-
-**১. Database Tuning:**
-
-PostgreSQL configuration আপডেট:
-
-```sql
-# /etc/postgresql/14/main/postgresql.conf
-
-shared_buffers = 2GB
-effective_cache_size = 6GB
-work_mem = 64MB
-maintenance_work_mem = 512MB
-```
-
-**২. Index তৈরি:**
-
-যেসব ফিল্ডে প্রায়ই সার্চ করা হয় সেগুলোতে index:
-
-```sql
-CREATE INDEX idx_device_name ON dcim_device(name);
-CREATE INDEX idx_ipaddress_address ON ipam_ipaddress(host(address));
-```
-
-**৩. Pagination বাড়ানো:**
-
-User Preferences-এ:
-```
-Items per page: 100 (ডিফল্ট 25 থেকে বাড়ানো)
-```
-
-**৪. Saved Filters ইউজ:**
-
-বারবার একই complex query না চালিয়ে Saved Filters ব্যবহার।
-
-### Response Time Monitoring
-
-একটা সিম্পল স্ক্রিপ্ট যা Nautobot API response time মাপে:
-
-```python
-import time
-from pynautobot import api
-
-nb = api(url="https://nautobot.skynet.bd", token="token")
-
-start = time.time()
-devices = nb.dcim.devices.all()
-end = time.time()
-
-print(f"Fetched {len(devices)} devices in {end-start:.2f} seconds")
-
-# Target: <2 seconds for 120 devices
-if (end - start) > 2:
-    print("WARNING: Slow response time!")
-```
-
-প্রতি সপ্তাহে এই স্ক্রিপ্ট চালান। যদি রেসপন্স টাইম বাড়তে থাকে, optimization দরকার।
+   - Connectivity test করে
 
 ### সপ্তম চ্যালেঞ্জ: Data Quality Control
 
-১২০ ডিভাইস মানে ১২০ জায়গায় ভুল হওয়ার সম্ভাবনা। Data Quality নিশ্চিত করা জরুরি।
+১৫০ ডিভাইস মানে ১৫০ জায়গায় ভুল হওয়ার সম্ভাবনা। Data Quality নিশ্চিত করা জরুরি।
 
-### Weekly Data Audit
+#### Weekly Data Audit
 
-SkyNet প্রতি সপ্তাহে একটা ডেটা অডিট করে:
+SkyNets প্রতি সপ্তাহে একটা ডেটা অডিট করে:
 
 **সোমবার: Device Audit**
-```
-চেক করুন:
 - সব Active ডিভাইসের Serial Number আছে কিনা
 - সব ডিভাইসের Location সঠিক কিনা
 - নেমিং কনভেনশন মানা হচ্ছে কিনা
-```
 
 **বুধবার: IP Audit**
-```
-চেক করুন:
 - কোনো ডুপ্লিকেট IP নেই তো
-- কোনো IP ভুল prefix-এ নেই তো
+- কোনো IP ভুল prefix এ নেই তো
 - DNS names unique কিনা
-```
 
 **শুক্রবার: Cable Audit**
-```
-চেক করুন:
 - Critical cables ডকুমেন্টেড কিনা
 - Cable status সঠিক কিনা (Connected/Planned)
+
+#### Automated Validation
+
+প্রতি সোমবার সকালে একটা Python script চলে যা validate করে এবং রিপোর্ট ইমেইল করে:
+
+```
+Missing Serial Numbers: 3 devices
+Duplicate IPs: 0
+Non-standard Device Names: 2 devices
+Orphaned IPs (no device assigned): 5 IPs
 ```
 
-### Automated Validation Script
+টিম লিডার এই রিপোর্ট দেখে action নেন।
 
-একটা Python স্ক্রিপ্ট যা automatically validate করে:
+### অষ্টম চ্যালেঞ্জ: Performance এবং Response Time
 
-```python
-from pynautobot import api
-from collections import Counter
+১৫০+ ডিভাইস, ৮টা সাইট, হাজার হাজার আইপি - Nautobot UI স্লো হয়ে যাচ্ছিল না তো?
 
-nb = api(url="https://nautobot.skynet.bd", token="token")
+#### Performance Optimization
 
-print("=== SkyNet Data Quality Report ===\n")
+SkyNets কিছু optimization করেছে:
 
-# 1. Devices without serial numbers
-devices = nb.dcim.devices.filter(status="active")
-no_serial = [d for d in devices if not d.serial]
-print(f"Devices without serial: {len(no_serial)}")
-if no_serial:
-    for d in no_serial[:5]:  # Show first 5
-        print(f"  - {d.name}")
+**১. PostgreSQL Tuning:**
 
-# 2. Duplicate IP addresses
-ips = nb.ipam.ip_addresses.all()
-ip_list = [ip.address for ip in ips]
-duplicates = [ip for ip, count in Counter(ip_list).items() if count > 1]
-print(f"\nDuplicate IPs: {len(duplicates)}")
-
-# 3. Devices without location
-no_location = [d for d in devices if not d.location]
-print(f"\nDevices without location: {len(no_location)}")
-
-# 4. Naming convention check
-bad_names = []
-for d in devices:
-    # Should be: [Type]-DN-[Site]-[Role]-[Num]
-    parts = d.name.split('-')
-    if len(parts) != 5 or parts[1] != 'DN':
-        bad_names.append(d.name)
-
-print(f"\nDevices with non-standard names: {len(bad_names)}")
-if bad_names:
-    for name in bad_names[:5]:
-        print(f"  - {name}")
+```
+shared_buffers = 4GB (ডিফল্ট 128MB থেকে বাড়ানো)
+effective_cache_size = 12GB
+work_mem = 64MB
+maintenance_work_mem = 1GB
 ```
 
-এই স্ক্রিপ্ট প্রতি সোমবার সকালে cron দিয়ে চালান। রিপোর্ট ইমেইলে পাঠান।
+**২. Pagination বাড়ানো:**
 
-### অষ্টম চ্যালেঞ্জ: Backup এবং Disaster Recovery
+User Preferences এ:
+```
+Items per page: 100 (ডিফল্ট 25 থেকে)
+```
 
-৫০ হাজার কাস্টমারের নেটওয়ার্ক ডাটা হারিয়ে গেলে বিপদ। Backup strategy আরো robust করা হয়েছে।
+**৩. Saved Filters ব্যবহার:**
 
-### Multi-Layer Backup
+বারবার একই complex query না চালিয়ে Saved Filters ব্যবহার।
 
-**Layer 1: Database Backup (দৈনিক)**
+**৪. Regular Database Maintenance:**
+
+মাসে একবার:
 ```bash
-#!/bin/bash
-# /home/skynet/backup-nautobot.sh
-
-DATE=$(date +%Y%m%d_%H%M%S)
-BACKUP_DIR="/backup/nautobot/database"
-
-# PostgreSQL dump
-docker exec nautobot-db-1 pg_dump -U nautobot nautobot > \
-  $BACKUP_DIR/nautobot_$DATE.sql
-
-# Compress
-gzip $BACKUP_DIR/nautobot_$DATE.sql
-
-# Keep last 30 days
-find $BACKUP_DIR -name "*.sql.gz" -mtime +30 -delete
-
-echo "Backup completed: $DATE"
+sudo -u postgres vacuumdb --analyze nautobot
 ```
 
-**Layer 2: Full Export (সাপ্তাহিক)**
-```python
-# export-all-data.py
-from pynautobot import api
-import json
-from datetime import datetime
+এই optimizations এর পরে response time ভালো আছে। ডিভাইস লিস্ট লোড হতে ২-৩ সেকেন্ড লাগে যা acceptable।
 
-nb = api(url="https://nautobot.skynet.bd", token="token")
-
-data = {
-    'export_date': datetime.now().isoformat(),
-    'locations': [],
-    'devices': [],
-    'ip_addresses': [],
-    'vlans': [],
-}
-
-# Export locations
-for loc in nb.dcim.locations.all():
-    data['locations'].append({
-        'name': loc.name,
-        'location_type': str(loc.location_type),
-        'status': str(loc.status),
-    })
-
-# Export devices
-for dev in nb.dcim.devices.all():
-    data['devices'].append({
-        'name': dev.name,
-        'device_type': str(dev.device_type),
-        'location': str(dev.location),
-        'serial': dev.serial,
-    })
-
-# ... একইভাবে IP এবং VLAN
-
-# Save to JSON
-filename = f"nautobot_export_{datetime.now().strftime('%Y%m%d')}.json"
-with open(filename, 'w') as f:
-    json.dump(data, f, indent=2)
-
-print(f"Export completed: {filename}")
-```
-
-**Layer 3: Offsite Backup (মাসিক)**
-
-সব ব্যাকআপ Google Drive বা AWS S3-এ কপি করুন।
-
-### Disaster Recovery Test
-
-বছরে একবার DR test করুন:
-
-১. একটা টেস্ট সার্ভারে Nautobot ইনস্টল করুন
-২. সর্বশেষ ব্যাকআপ restore করুন
-৩. যাচাই করুন সব ডেটা ঠিক আছে কিনা
-৪. সময় মাপুন - কত দ্রুত restore করা যায়
-
-SkyNet-এর টার্গেট: ৪ ঘন্টার মধ্যে ফুল restore।
-
-### ৬ মাসের রোডম্যাপ - ৫ হাজার থেকে ৫০ হাজারে
+### ৬ মাসের রোডম্যাপ - ৮ হাজার থেকে ৫০ হাজারে
 
 এই স্কেলিং একদিনে হয়নি। ছয় মাস লেগেছে। এই ছিল রোডম্যাপ:
 
-### মাস ১-২: Foundation Strengthening
+#### মাস ১-২: Foundation Strengthening
 
-- Location hierarchy তৈরি
-- নেমিং কনভেনশন আপডেট
-- পুরোনো ডিভাইস রিনেম
-- Permission structure সেটআপ
+**মাস ১:**
+- Location hierarchy আপডেট
+- নতুন Clusters তৈরি (Gulshan, Central)
+- নেমিং কনভেনশন ফাইনালাইজ
+- পুরোনো ডিভাইস রিনেম প্ল্যান
 
-### মাস ৩-৪: New Sites Onboarding
+**মাস ২:**
+- পুরোনো ডিভাইস রিনেম execution
+- নতুন আইপি ব্লক পাওয়া
+- IP addressing স্কিম ডিজাইন
+- Permission structure review
 
-- উত্তরা পপ যুক্ত (প্রথম নতুন সাইট)
-- বনানী পপ যুক্ত
+#### মাস ৩-৪: New Sites Onboarding
+
+**মাস ৩:**
+- কল্যাণপুর পপ যুক্ত (প্রথম নতুন সাইট - ধীরে ধীরে)
 - গুলশান পপ যুক্ত
 - প্রতিটা সাইটে ফুল ডকুমেন্টেশন
 
-### মাস ৫: IP এবং VLAN Restructuring
+**মাস ৪:**
+- বনানী পপ যুক্ত
+- বারিধারা পপ যুক্ত
+- Team training (নতুন members দের)
+
+#### মাস ৫: IP এবং VLAN Restructuring
 
 - নতুন IP blocks যুক্ত
 - VLAN স্ট্রাকচার রিডিজাইন
-- Migration প্ল্যানিং
+- Migration প্ল্যানিং এবং execution
 
-### মাস ৬: Automation এবং Optimization
+#### মাস ৬: Final Sites এবং Optimization
 
-- Backup automation
-- Data quality scripts
+- ধানমন্ডি পপ যুক্ত
+- মোহাম্মদপুর পপ যুক্ত
 - Performance tuning
-- Team training
+- Automation scripts তৈরি
+- Team training complete
 
 ### Key Metrics - আগে এবং পরে
 
 কিছু সংখ্যা যা সফলতা প্রমাণ করে:
 
-**২০২৪ (৫ হাজার কাস্টমার):**
-
+**২০২৫ (৮ হাজার কাস্টমার):**
 - নতুন সাইট যুক্ত করতে সময়: ২ সপ্তাহ
-- ডেটা এন্ট্রি ভুলের হার: ~১৫%
-- NOC query response time: ৫-১০ মিনিট
-- ম্যানুয়াল কাজ: ৭০%
+- ডেটা এন্ট্রি ভুলের হার: ~১২%
+- NOC query response time: ৫-৮ মিনিট
+- ম্যানুয়াল কাজ: ৭৫%
 
-**২০২৬ (৫০ হাজার কাস্টমার):**
-
+**২০২৭ (৫০ হাজার কাস্টমার):**
 - নতুন সাইট যুক্ত করতে সময়: ৩ দিন
-- ডেটা এন্ট্রি ভুলের হার: ~৫%
+- ডেটা এন্ট্রি ভুলের হার: ~৪%
 - NOC query response time: ৩০ সেকেন্ড
-- ম্যানুয়াল কাজ: ৩০%
+- ম্যানুয়াল কাজ: ২৫%
 
-### প্রধান প্রযুক্তি কর্মকর্তার পরামর্শ
+### শিক্ষা এবং পরামর্শ
 
-SkyNet-এর CTO জাহাঙ্গীর সাহেবের কিছু পরামর্শ:
+SkyNets এর CTO জাহাঙ্গীর সাহেবের কিছু পরামর্শ:
 
 **১. একবারে সব করতে যাবেন না**
-"আমরা ভুল করেছিলাম প্রথমে সব আটটা সাইট একসাথে করতে গিয়ে। পরে বুঝলাম একটা একটা করে করলে ভালো হয়।"
+
+"আমরা ভুল করেছিলাম প্রথমে সব নতুন সাইট একসাথে করতে গিয়ে। পরে বুঝলাম একটা একটা করে করলে ভালো হয়। কল্যাণপুর পপ সম্পূর্ণ করে তারপর গুলশান - এভাবে করলে lesson শিখতে পেরেছি।"
 
 **২. নেমিং কনভেনশন শুরুতেই ভবিষ্যৎ মাথায় রেখে করুন**
-"আমাদের দুইবার নাম চেঞ্জ করতে হয়েছে। প্রথমবারই যদি স্কেলেবল কনভেনশন করতাম, এত ঝামেলা হতো না।"
 
-**৩. Automation আগে থেকে শুরু করুন**
-"যখন ছোট ছিলাম তখন মনে হয়েছিল ম্যানুয়ালি করি। বড় হয়ে গিয়ে automation করতে অনেক কষ্ট হয়েছে।"
+"আমাদের একবার নাম চেঞ্জ করতে হয়েছে। প্রথমবারই যদি স্কেলেবল কনভেনশন করতাম, এত ঝামেলা হতো না।"
+
+**৩. Data quality এ কম্প্রোমাইজ করবেন না**
+
+"একটা ভুল ডেটা এন্ট্রি পুরো নেটওয়ার্কে সমস্যা করতে পারে। Weekly audit করুন, automated validation রাখুন।"
 
 **৪. টিমকে সাথে নিন**
-"Nautobot শুধু একজনের জিনিস না। পুরো টিম যদি ইউজ না করে, তাহলে ডেটা আউটডেটেড হয়ে যায়।"
 
-**৫. Data quality-তে কম্প্রোমাইজ করবেন না**
-"একটা ভুল ডেটা এন্ট্রি পুরো নেটওয়ার্কে সমস্যা করতে পারে। কোয়ালিটি মেইনটেইন করুন।"
+"Nautobot শুধু একজনের জিনিস না। পুরো টিম যদি ইউজ না করে, তাহলে ডেটা আউটডেটেড হয়ে যায়। প্রপার ট্রেনিং দিন, documentation রাখুন।"
 
-### এগিয়ে যাওয়ার পথ
+**৫. Performance monitoring করুন**
 
-SkyNet এখন ৫০ হাজার কাস্টমারে স্ট্যাবল। পরের লক্ষ্য ১ লক্ষ। সেজন্য তারা এখন প্রস্তুতি নিচ্ছে:
+"স্কেল বাড়ার সাথে সাথে রেগুলার পারফরম্যান্স চেক করুন। Database tuning, caching - এগুলো গুরুত্বপূর্ণ।"
 
-- **ঢাকা সাউথ সম্প্রসারণ:** নতুন zone যুক্ত করা
-- **API-based provisioning:** নতুন কাস্টমার অটোমেটিক Nautobot-এ যুক্ত হবে
-- **Monitoring integration:** Prometheus/Grafana সাথে Nautobot connect
-- **Golden Config:** সব ডিভাইসের কনফিগ ব্যাকআপ এবং compliance check
+### চ্যাপ্টার সারাংশ
 
-পরের চ্যাপ্টারে আমরা দেখব একটা বাংলাদেশি আইএসপির সম্পূর্ণ রিয়েল কেস স্টাডি - কীভাবে তারা শুরু করেছিল, কী কী সমস্যার মুখোমুখি হয়েছিল, আর শেষপর্যন্ত কীভাবে সফল হয়েছিল।
+এই চ্যাপ্টারে আমরা দেখলাম:
+
+**স্কেলিং চ্যালেঞ্জ:**
+- লোকেশন হায়ারার্কি রি-অর্গানাইজ করা
+- ডিভাইস নেমিং স্কেল করা
+- IP এবং VLAN ম্যানেজমেন্ট
+- Cable management বাস্তবতা
+- Multi-team collaboration
+- Data quality control
+- Performance optimization
+
+**সফলতার চাবি:**
+- ধাপে ধাপে স্কেল করা (একবারে সব না)
+- স্কেলেবল নেমিং কনভেনশন
+- প্র্যাগম্যাটিক পলিসি (সব ট্র্যাক না করে গুরুত্বপূর্ণ জিনিস ট্র্যাক করা)
+- Regular audit এবং validation
+- Team training এবং collaboration
+- Performance monitoring
+
+SkyNets Bangladesh এখন ৫০ হাজার কাস্টমারে স্ট্যাবল। তাদের লক্ষ্য পরের দুই বছরে ১ লক্ষ কাস্টমার। সেজন্য তারা এখন অটোমেশনের দিকে যাচ্ছে। পরের চ্যাপ্টারে আমরা দেখব কীভাবে API এবং Python দিয়ে Nautobot কে অটোমেট করা যায়।
+
+---

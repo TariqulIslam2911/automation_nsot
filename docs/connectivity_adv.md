@@ -1,577 +1,834 @@
-আগের চ্যাপ্টারে আমরা নেটওয়ার্ক ইনভেন্টরি তৈরি করলাম - সাইট, ডিভাইস, ইন্টারফেস, আইপি। এখন সময় এসেছে এই সব কিছুকে একসাথে জোড়া লাগানোর। কোন ডিভাইস কোন ডিভাইসের সাথে কানেক্টেড, কোন ক্যাবল কোথায় গেছে, আপস্ট্রিম প্রোভাইডার কে - এসব ডকুমেন্ট করা। আর একইসাথে দেখব কীভাবে Nautobot-কে আপনার নিজের মতো কাস্টমাইজ করবেন।
+আগের চ্যাপ্টারে আমরা বেসিক ডেটা এন্ট্রি শিখলাম - লোকেশন, ডিভাইস, আইপি, ভিল্যান, ক্যাবল। SkyNets Bangladesh এর NOC টিম এখন দৈনন্দিন কাজে Nautobot ব্যবহার শুরু করেছে। কিন্তু কিছুদিন পরেই তারা বুঝতে পারল বেসিক ফিচারগুলো যথেষ্ট না। 
 
-এই চ্যাপ্টারটা একটু আলাদা। এখানে আমরা বেশ কিছু টপিক কভার করব যেগুলো আপনার Nautobot সেটআপকে কমপ্লিট করে দেবে। শুরু করি প্রোভাইডার আর সার্কিট দিয়ে।
+তাদের টিম লিডার জাহাঙ্গীর সাহেব একটা মিটিং ডাকলেন। সমস্যাগুলো শুনলেন:
 
-### Provider এবং Circuit Management
+**আসিফ (NOC টেকনিশিয়ান):** "স্যার, আমাদের ১০০+ ডিভাইস আছে। কোনটার ওয়ারেন্টি কবে শেষ হবে মনে রাখা অসম্ভব। গত সপ্তাহে একটা সুইচ নষ্ট হলো - তখন খুঁজে দেখলাম ওয়ারেন্টি ৬ মাস আগেই শেষ!"
 
-আপনার আইএসপি চালাতে হলে ইন্টারনেট লাগবে। আর সেই ইন্টারনেট আসে আপস্ট্রিম প্রোভাইডার থেকে। বাংলাদেশে হতে পারে BTCL, Summit Communications, Fiber@Home, বা অন্য কোনো IIG/ICSP লেয়ার থেকে। এই প্রোভাইডারদের ডিটেইলস আর তাদের কাছ থেকে নেওয়া লিংক (Circuit) Nautobot-এ রাখা খুবই গুরুত্বপূর্ণ।
+**করিম (ফিল্ড টেকনিশিয়ান):** "আমাকে বলা হয় 'বিল্ডিং সি তে গিয়ে সুইচ চেক করো'। কিন্তু Nautobot এ বিল্ডিং নাম নেই। সব সুইচের নাম SW-DN-MIR-ACC-০১, ০২, ০৩... কোনটা কোথায় বুঝি না!"
 
-### Provider তৈরি করা
+**রফিক (ম্যানেজার):** "আমার শুধু ডেটা দেখার দরকার। কিন্তু admin একাউন্ট দিয়ে লগইন করতে হয়। ভুলে কিছু ডিলিট করে দিলে সমস্যা!"
 
-চলুন QuickNet Bangladesh-এর জন্য তাদের প্রাইমারি প্রোভাইডার এড করি। ধরুন তারা BTCL থেকে ইন্টারনেট নিয়েছে।
+জাহাঙ্গীর সাহেব বললেন, "চিন্তা নেই। Nautobot এ এসবের সমাধান আছে। চলুন দেখি কীভাবে।"
 
-নেভিগেশন বারে **Circuits → Providers** যান। **+ Add** বাটনে ক্লিক করুন।
+এই চ্যাপ্টারে আমরা Nautobot এর এডভান্সড ফিচারগুলো দেখব যা দিয়ে সিস্টেমকে নিজের মতো কাস্টমাইজ করা যায়।
 
-একটা ফর্ম আসবে। পূরণ করুন:
+---
 
-```
-Name: BTCL
-ASN: 1x494
-Account Number: QN-BTCL-2024-001
-Portal URL: https://isp.btcl.gov.bd
-NOC Contact: +880 2-955xx55
-Admin Contact: noc@btcl.gov.bd
-Comments: Tartiary upstream provider. Contract started Jan 2024.
-```
+### Custom Fields - নিজস্ব ডেটা ট্র্যাকিং
 
-**ASN** হলো Autonomous System Number। এটা প্রতিটা ইন্টারনেট সার্ভিস প্রোভাইডারের একটা ইউনিক নাম্বার। BTCL-এর ASN হলো 1x494। আপনি গুগল করলেই যেকোনো প্রোভাইডারের ASN পেয়ে যাবেন।
+Nautobot এ অনেক built-in ফিল্ড আছে - name, location, serial number, status। কিন্তু প্রতিটা অর্গানাইজেশনের নিজস্ব কিছু ডেটা ট্র্যাক করার দরকার হয় যা স্ট্যান্ডার্ড ফিল্ডে নেই। এজন্যই Custom Fields।
 
-**Account Number** হলো আপনার প্রোভাইডারের কাছে আপনার অ্যাকাউন্ট নাম্বার। এটা বিলিং বা সাপোর্ট টিকেটের সময় কাজে লাগে।
+#### সমস্যা ১: ওয়ারেন্টি ট্র্যাকিং
 
-**Create** বাটনে ক্লিক করুন। আপনার প্রথম প্রোভাইডার এড হয়ে গেল।
+আসিফের সমস্যাটা solve করি। প্রতিটা ডিভাইসের ওয়ারেন্টি কবে শেষ হবে সেটা ট্র্যাক করতে হবে।
 
-একইভাবে যদি ব্যাকআপ প্রোভাইডার থাকে, সেটাও এড করে ফেলুন। যেমন:
-
-```
-Name: Summit Communications
-ASN: 4x928
-Account Number: QN-SUMMIT-2024-002
-Portal URL: https://portal.summitcommunications.net
-NOC Contact: +880 2-883x464
-Admin Contact: noc@summitcommunications.net
-Comments: Primary/backup provider
-```
-
-### Circuit Type তৈরি
-
-Circuit এড করার আগে Circuit Type তৈরি করতে হবে। Circuit Type মানে হলো লিংকের ধরন। যেমন ফাইবার অপটিক, মাইক্রোওয়েভ, IPLC ইত্যাদি।
-
-**Circuits → Circuit Types** যান। **+ Add** ক্লিক করুন।
-
-```
-Name: Fiber Optic
-Description: Fiber optic connectivity
-```
-
-**Create** করুন। একইভাবে আরো কয়েকটা টাইপ বানান:
-
-```
-Name: Microwave Link
-Description: Point-to-point microwave
-
-Name: IPLC
-Description: International Private Leased Circuit
-```
-
-### Circuit তৈরি করা
-
-এখন আসল সার্কিট তৈরি করব। ধরুন QuickNet তাদের মিরপুর পপে BTCL থেকে একটা ১০ Gbps ফাইবার লিংক নিয়েছে।
-
-**Circuits → Circuits** যান। **+ Add** ক্লিক করুন।
-
-```
-Circuit ID: BTCL-MIR-001
-Provider: BTCL
-Type: Fiber Optic
-Status: Active
-Install Date: 2024-01-15
-Commit Rate: 10000 Mbps
-Description: Primary 10G uplink from Mirpur POP
-```
-
-**Circuit ID** হলো একটা ইউনিক আইডেন্টিফায়ার। একটা স্ট্যান্ডার্ড ফরম্যাট মেনে চলুন। আমরা ব্যবহার করেছি [Provider]-[Location]-[Number] ফরম্যাট।
-
-**Commit Rate** হলো গ্যারান্টিড ব্যান্ডউইথ। এটা Mbps-এ দিতে হবে। ১০ Gbps মানে ১০০০০ Mbps।
-
-এখন **Create and Add Another** বাটনে ক্লিক করুন (যদি একাধিক সার্কিট এড করতে চান)। অথবা শুধু **Create** ক্লিক করুন।
-
-সার্কিট তৈরি হওয়ার পরে আপনি ডিটেইল পেজে যাবেন। এখানে আরো কিছু ইনফরমেশন এড করতে পারবেন।
-
-### Circuit Termination - সার্কিট কোথায় শেষ হচ্ছে
-
-একটা সার্কিটের দুটো প্রান্ত থাকে। একদিকে প্রোভাইডার, অন্যদিকে আপনার ডিভাইস। এই দুই প্রান্তকে বলা হয় Termination।
-
-Circuit ডিটেইল পেজে **Terminations** ট্যাবে যান। **+ Add Termination** ক্লিক করুন।
-
-প্রথম টার্মিনেশন (প্রোভাইডারের দিক):
-
-```
-Term Side: A
-Location: (খালি রাখুন - প্রোভাইডার সাইড)
-Port Speed: 10 Gbps
-Upstream Speed: 10000 Mbps
-Cross Connect ID: BTCL-XC-12345 (যদি প্রোভাইডার দিয়ে থাকে)
-PP Info: PP-BTCL-MIR-001 (Patch Panel ইনফো)
-Description: BTCL side termination
-```
-
-**Create** করুন।
-
-এখন দ্বিতীয় টার্মিনেশন (আপনার ডিভাইসের দিক):
-
-**+ Add Termination** আবার ক্লিক করুন।
-
-```
-Term Side: Z
-Location: Mirpur POP
-Device: R-MIR-CORE-01
-Interface: sfpplus1
-Port Speed: 10 Gbps
-Description: Connected to core router uplink port
-```
-
-**Create** করুন। এখন আপনার সার্কিট সম্পূর্ণভাবে ডকুমেন্ট করা। যে কেউ দেখলেই বুঝবে এই সার্কিট কোথা থেকে এসে কোথায় কানেক্টেড।
-
-একটা প্র্যাক্টিক্যাল টিপ: Comments ফিল্ডে কন্ট্রাক্ট ডিটেইলস লিখে রাখুন। যেমন:
-
-```
-Comments:
-- Contract Start: 15-Jan-2024
-- Contract Duration: 3 years
-- Monthly Cost: BDT 500,000
-- Contract Renewal Date: 15-Jan-2027
-- Sales Contact: Mr. Karim, +880 17xx-123456
-- Support Ticket Email: support@btcl.gov.bd
-```
-
-এই ইনফরমেশন পরে অনেক কাজে লাগবে। বিশেষ করে যখন কন্ট্রাক্ট রিনিউয়ালের সময় আসবে।
-
-## Cable Management - তার কোথায় গেল?
-
-নেটওয়ার্কে সবচেয়ে বিরক্তিকর জিনিস হলো ক্যাবল ম্যানেজমেন্ট। কোন তার কোথায় গেছে, কোন পোর্ট কোন পোর্টে কানেক্টেড - এগুলো ট্র্যাক করা। Nautobot-এ এটা খুবই সহজ।
-
-### Cable তৈরি করা
-
-ধরুন আপনার কোর রাউটার (R-MIR-CORE-01) থেকে একটা ডিস্ট্রিবিউশন সুইচে (SW-MIR-DIST-01) একটা ফাইবার ক্যাবল আছে।
-
-দুটো উপায়ে ক্যাবল তৈরি করতে পারেন।
-
-**পদ্ধতি ১: Device Interface থেকে**
-
-R-MIR-CORE-01 ডিভাইসে যান। **Interfaces** ট্যাবে ক্লিক করুন। ধরুন sfpplus2 পোর্ট দিয়ে সুইচে যাচ্ছে। এই ইন্টারফেসে ক্লিক করুন।
-
-ইন্টারফেস ডিটেইল পেজে **Connect Cable** বাটন দেখবেন। ক্লিক করুন।
+**Extras → Custom Fields** যান। **+ Add** ক্লিক করুন।
 
 একটা ফর্ম আসবে:
 
 ```
-Termination A (Already filled):
-Device: R-MIR-CORE-01
-Interface: sfpplus2
-
-Termination Z:
-Device: SW-MIR-DIST-01
-Interface: sfpplus1
-
-Cable Type: SMF (Single-Mode Fiber)
-Status: Connected
-Color: Blue
-Length: 5 (meters)
-Label: CORE-TO-DIST-01
-```
-
-**Create** ক্লিক করুন। ক্যাবল তৈরি হয়ে গেল।
-
-এখন যদি কোনো একটা ডিভাইসের ইন্টারফেসে যান, দেখবেন "Cable Connected" দেখাচ্ছে। ক্লিক করলে পুরো ক্যাবল ডিটেইলস দেখাবে।
-
-**পদ্ধতি ২: সরাসরি Cable তৈরি**
-
-**Devices → Cables** যান। **+ Add** ক্লিক করুন।
-
-```
-Termination A Type: Interface
-Termination A - Device: R-MIR-CORE-01
-Termination A - Interface: ether3
-
-Termination Z Type: Interface
-Termination Z - Device: SW-MIR-ACC-01
-Termination Z - Interface: ether1
-
-Type: CAT6
-Status: Connected
-Color: Yellow
-Length: 15
-Label: CORE-TO-ACC-01
-```
-
-এভাবে প্রতিটা কানেকশন ডকুমেন্ট করুন।
-
-### Cable Color Coding
-
-একটা ভালো প্র্যাক্টিস হলো ক্যাবলে কালার কোডিং করা। যেমন:
-
-- **Blue**: Fiber (Single-Mode)
-- **Orange**: Fiber (Multi-Mode)  
-- **Yellow**: Cat6 Ethernet
-- **Red**: Uplink/Critical
-- **Green**: Access/Customer
-- **Gray**: Management
-
-আপনার নিজের স্ট্যান্ডার্ড বানান আর সেটা মেনে চলুন।
-
-### Trace Cable - ক্যাবল ফলো করা
-
-Nautobot-এ একটা দারুণ ফিচার আছে - Cable Trace। ধরুন একটা কাস্টমার রিপোর্ট করল তার নেট নেই। আপনি জানতে চান এই কাস্টমারের কানেকশন কোন কোন ডিভাইস দিয়ে যাচ্ছে।
-
-যেকোনো ইন্টারফেসে গিয়ে **Trace** বাটনে ক্লিক করুন। Nautobot পুরো পাথ দেখাবে - এই পোর্ট থেকে শুরু করে শেষ পর্যন্ত কোথায় গেছে, মাঝে কোন কোন ডিভাইস আছে।
-
-এটা ট্রাবলশুটিং করার সময় অমূল্য।
-
-## Custom Fields - নিজের মতো করে সাজান
-
-Nautobot-এ অনেক বিল্ট-ইন ফিল্ড আছে। কিন্তু কখনো কখনো আপনার নিজস্ব কিছু ইনফরমেশন স্টোর করতে হবে যেটা ডিফল্টে নেই। এজন্য আছে Custom Fields।
-
-### কখন Custom Field লাগে?
-
-কিছু উদাহরণ:
-
-১. **Warranty Expiry Date:** প্রতিটা ডিভাইসের ওয়ারেন্টি কবে শেষ হবে সেটা ট্র্যাক করতে চান।
-
-২. **Purchase Order Number:** ডিভাইস কেনার সময় PO নাম্বার রেকর্ড করতে চান।
-
-৩. **Power Consumption:** প্রতিটা ডিভাইস কত ওয়াট খায় সেটা জানতে চান ক্যাপাসিটি প্ল্যানিং এর জন্য।
-
-৪. **Building Name:** কাস্টমার কোন বিল্ডিংয়ে আছে সেটা ট্র্যাক করতে চান।
-
-চলুন একটা Custom Field তৈরি করি।
-
-### Custom Field তৈরির ধাপ
-
-ধরুন আমরা সব ডিভাইসে Warranty Expiry Date ফিল্ড যোগ করতে চাই।
-
-**Extensibility → Custom Fields** যান। **+ Add** ক্লিক করুন।
-
-```
-Content Types: dcim | device (এটা সিলেক্ট করুন)
 Label: Warranty Expiry Date
-Key: warranty_expiry (এটা অটো-জেনারেট হবে, চাইলে এডিট করতে পারেন)
+Key: warranty_expiry_date
+```
+
+`Label` হলো যেটা UI তে দেখাবে। `Key` হলো ডেটাবেসে যেভাবে স্টোর হবে। সাধারণত Label টাইপ করলে Key অটোমেটিক জেনারেট হয়ে যায়।
+
+```
+Group Name: Procurement
+```
+
+Group Name দিয়ে related ফিল্ডগুলো একসাথে গ্রুপ করা যায়। এটা অপশনাল কিন্তু organize করার জন্য ভালো।
+
+এখন সবচেয়ে ইম্পর্ট্যান্ট পার্ট:
+
+```
+Content Types: dcim | device
+```
+
+এখানে বলে দিতে হবে এই ফিল্ড কোথায় দেখাবে। ড্রপডাউনে অনেক অপশন দেখবেন - dcim | device, dcim | rack, ipam | ip address ইত্যাদি। আমরা চাই শুধু ডিভাইসে দেখাক, তাই `dcim | device` সিলেক্ট করুন।
+
+```
 Type: Date
-Description: Device warranty expiration date
-Required: No (চেকবক্স আনচেক রাখুন)
-Default: (খালি)
+```
+
+এটা একটা ডেট ফিল্ড। অন্যান্য টাইপ আছে:
+- Text (সাধারণ টেক্সট)
+- Integer (পূর্ণসংখ্যা)
+- Boolean (হ্যাঁ/না)
+- Date (তারিখ)
+- URL (ওয়েবসাইট লিংক)
+- Selection (ড্রপডাউন সিলেকশন)
+- Multiple Selection (একাধিক সিলেক্ট করা যায়)
+- JSON (complex ডেটা)
+
+আমাদের ক্ষেত্রে Date ঠিক আছে।
+
+```
+Required: No
+```
+
+আনচেক রাখুন। মানে সব ডিভাইসে এটা দেওয়া বাধ্যতামূলক না। কারণ কিছু পুরোনো ডিভাইসের ওয়ারেন্টি ইতিমধ্যে শেষ হয়ে গেছে, কিছুতে হয়তো ওয়ারেন্টিই নেই।
+
+```
+Default: (খালি রাখুন)
+
+Description: Date when device warranty expires
+Help Text: Format: YYYY-MM-DD. Leave blank if no warranty.
+```
+
+Description হলো internal - এটা admin দের জন্য। Help Text হলো যেটা ইউজারকে গাইড করবে ফিল্ড পূরণ করার সময়।
+
+```
 Weight: 100
 ```
 
-**Content Types** খুবই গুরুত্বপূর্ণ। এটা দিয়ে বলছেন কোন অবজেক্টে এই ফিল্ড দেখাবে। আমরা `dcim | device` সিলেক্ট করেছি মানে Device অবজেক্টে দেখাবে।
+Weight যত কম, ফিল্ড তত উপরে দেখাবে। ডিফল্ট 100 ঠিক আছে।
 
-**Type** অনেকগুলো অপশন আছে:
-- Text
-- Integer
-- Boolean (Yes/No)
-- Date
-- URL
-- Select (ড্রপডাউন)
-- Multi-select
+এখন **Create** ক্লিক করুন।
 
-আমরা Date সিলেক্ট করেছি কারণ তারিখ স্টোর করব।
+Custom Field তৈরি হয়ে গেছে! এখন যেকোনো ডিভাইস এডিট করলে এই নতুন ফিল্ড দেখবেন।
 
-**Create** ক্লিক করুন।
+চলুন মিরপুর কোর রাউটারে যোগ করি:
 
-এখন যেকোনো Device-এ গিয়ে Edit করুন। দেখবেন নতুন একটা ফিল্ড এসেছে - "Warranty Expiry Date"। এখানে তারিখ সিলেক্ট করতে পারবেন।
+**Devices → Devices → R-DN-MIR-CORE-01** এ যান। **Edit** বাটনে ক্লিক করুন।
 
-### আরেকটা উদাহরণ: Power Consumption
+নিচের দিকে স্ক্রল করুন। **Custom Fields** নামে একটা সেকশন দেখবেন:
 
 ```
+Procurement
+  └── Warranty Expiry Date: [        ]
+```
+
+একটা ডেট পিকার দেখাবে। ক্লিক করুন এবং তারিখ সিলেক্ট করুন। ধরুন এই রাউটার কেনা হয়েছিল ডিসেম্বর ২০২২ এ, ৩ বছরের ওয়ারেন্টি। তাহলে:
+
+```
+Warranty Expiry Date: 2025-12-31
+```
+
+**Update** বাটনে ক্লিক করুন।
+
+এখন ডিভাইস ডিটেইল পেজে দেখবেন:
+
+```
+Custom Fields
+  Warranty Expiry Date: 2025-12-31
+```
+
+চমৎকার! এখন সব ডিভাইসে ওয়ারেন্টি ডেট যোগ করুন:
+
+```
+SW-DN-MIR-DIST-01: 2026-06-15
+SW-DN-MIR-ACC-01: 2025-03-20
+SW-DN-MIR-ACC-02: 2025-03-20
+```
+
+**এখন ম্যাজিক দেখুন - ফিল্টারিং:**
+
+কিছুদিন পরে জাহাঙ্গীর সাহেব বললেন, "আমাকে একটা লিস্ট দাও - পরের তিন মাসে কোন ডিভাইসগুলোর ওয়ারেন্টি শেষ হবে। সেগুলোর জন্য AMC (Annual Maintenance Contract) রিনিউ করতে হবে।"
+
+আসিফ Nautobot খুলল:
+
+**Devices → Devices** লিস্টে গেল। ডান দিকে **Filters** প্যানেল খুলল।
+
+নিচের দিকে স্ক্রল করলে **Custom Fields** সেকশন দেখবে:
+
+```
+Warranty Expiry Date
+  ├─ After: [        ]
+  └─ Before: [        ]
+```
+
+আজকের তারিখ ২০২৫-০২-০৯। তিন মাস পরে ২০২৫-০৫-০৯।
+
+```
+After: 2025-02-09
+Before: 2025-05-09
+```
+
+**Apply** করল।
+
+লিস্টে শুধু সেই ডিভাইসগুলো দেখাল যাদের ওয়ারেন্টি পরের তিন মাসে শেষ হবে:
+
+```
+SW-DN-MIR-ACC-01 - Warranty: 2025-03-20 (৪০ দিন বাকি)
+```
+
+আসিফ এই লিস্ট **Export** বাটনে ক্লিক করে CSV ডাউনলোড করল। জাহাঙ্গীর সাহেবকে মেইল করে দিল। সমস্যা solved!
+
+#### সমস্যা ২: বিল্ডিং নাম ট্র্যাকিং
+
+এখন করিমের সমস্যা solve করি। এক্সেস সুইচগুলো বিভিন্ন বিল্ডিংয়ে আছে। লোকেশন ফিল্ডে "Mirpur POP" আছে, কিন্তু exact বিল্ডিং নাম নেই।
+
+আরেকটা Custom Field তৈরি করি:
+
+**Extras → Custom Fields → + Add**
+
+```
+Label: Building Name
+Key: building_name
+Group Name: Location Details
+
 Content Types: dcim | device
+
+Type: Text
+
+Required: No
+Default: (খালি)
+
+Description: Specific building or area where device is located
+Help Text: e.g., "Building A, Sector 12" or "Metro Tower, Floor 5"
+
+Validation Regex: (খালি রাখুন)
+```
+
+Validation Regex দিয়ে pattern চেক করানো যায়। যেমন শুধু "Building X" ফরম্যাট allow করতে চাইলে regex দিতে পারেন। আমাদের দরকার নেই এখন।
+
+```
+Weight: 110
+```
+
+**Create** করুন।
+
+এখন এক্সেস সুইচগুলোতে বিল্ডিং নাম যোগ করুন:
+
+```
+SW-DN-MIR-ACC-01 → Edit
+  Building Name: Building A, Sector 12
+
+SW-DN-MIR-ACC-02 → Edit
+  Building Name: Building B, Sector 12
+
+SW-DN-MIR-ACC-03 → Edit
+  Building Name: Building C, Sector 13
+```
+
+এখন করিমকে যদি বলা হয় "Building C তে যাও", সে Nautobot এ সার্চ করতে পারবে:
+
+**Devices → Devices** লিস্টে গিয়ে উপরের সার্চ বক্সে টাইপ করবে:
+
+```
+Building C
+```
+
+গ্লোবাল সার্চ সব ফিল্ডে খুঁজবে, Custom Fields সহ। SW-DN-MIR-ACC-03 খুঁজে পাবে।
+
+অথবা ফিল্টার ব্যবহার করতে পারে:
+
+```
+Filters প্যানেল → Custom Fields → Building Name
+টাইপ করুন: Building C
+```
+
+শুধু সেই সুইচ দেখাবে।
+
+#### আরো কিছু Useful Custom Fields
+
+SkyNets Bangladesh আরো কয়েকটা Custom Field তৈরি করেছে:
+
+**পাওয়ার কনজাম্পশন:**
+
+```
 Label: Power Consumption (Watts)
-Key: power_watts
-Type: Integer
-Description: Device power consumption in watts
-Required: No
-```
-
-এখন প্রতিটা ডিভাইসে পাওয়ার কনজাম্পশন এন্ট্রি করতে পারবেন। পরে একটা স্ক্রিপ্ট লিখে পুরো র‍্যাকের টোটাল পাওয়ার ক্যালকুলেট করতে পারবেন।
-
-### Select Type Custom Field
-
-আরেকটা দরকারি টাইপ হলো Select। ধরুন আপনি ডিভাইসের Purchase Source ট্র্যাক করতে চান।
-
-```
 Content Types: dcim | device
+Type: Integer
+Validation Minimum: 0
+Validation Maximum: 10000
+Description: Device power consumption in watts
+```
+
+এখন র্যাকের টোটাল পাওয়ার ক্যালকুলেট করা যায়। Rack A তে যদি ৫টা ডিভাইস থাকে:
+
+```
+R-DN-MIR-CORE-01: 85W
+SW-DN-MIR-DIST-01: 45W
+SW-DN-MIR-ACC-01: 25W
+SW-DN-MIR-ACC-02: 25W
+SW-DN-MIR-ACC-03: 25W
+
+Total: 205W
+```
+
+UPS সাইজ করার জন্য এই ডেটা কাজে লাগে।
+
+**পারচেজ সোর্স:**
+
+```
 Label: Purchase Source
-Key: purchase_source
+Content Types: dcim | device
 Type: Selection
-Description: Where the device was purchased from
-Required: No
 Choices:
-  - Local Vendor
-  - International Import
-  - Rental/Lease
-  - Donation
+  Local Vendor
+  International Import
+  Rental
+  Donation
+  Second Hand
+Description: How this device was procured
 ```
 
-**Choices** ফিল্ডে প্রতি লাইনে একটা অপশন লিখুন। এখন ডিভাইস এডিট করার সময় ড্রপডাউন থেকে সিলেক্ট করতে পারবেন।
+এখন রিপোর্ট করতে পারবেন: "আমাদের ৬০% ডিভাইস লোকাল ভেন্ডর থেকে, ৩০% ইমপোর্ট, ১০% রেন্টাল।"
 
-## Tags - সহজে ক্যাটাগরাইজ করুন
-
-Tags হলো একটা শক্তিশালী টুল যা দিয়ে আপনি যেকোনো অবজেক্টকে লেবেল করতে পারেন। তারপর সহজে ফিল্টার করতে পারেন।
-
-### Tag তৈরি করা
-
-**Extensibility → Tags** যান। **+ Add** ক্লিক করুন।
+**কাস্টমার কাউন্ট (এক্সেস সুইচের জন্য):**
 
 ```
-Name: Production
-Color: 4caf50 (সবুজ রঙ)
-Description: Production/live devices
+Label: Approximate Customers
+Content Types: dcim | device
+Type: Integer
+Description: Approximate number of customers served by this device
 ```
 
-**Create** করুন। একইভাবে আরো কিছু ট্যাগ বানান:
+```
+SW-DN-MIR-ACC-01: 280 customers
+SW-DN-MIR-ACC-02: 310 customers
+SW-DN-MIR-ACC-03: 265 customers
+```
+
+এখন জানেন কোন সুইচে বেশি লোড আছে।
+
+---
+
+### Tags - সহজ ক্যাটেগরাইজেশন
+
+ট্যাগ হলো ডেটা ক্যাটেগরাইজ করার একটা সহজ উপায়। যেকোনো অবজেক্টে একাধিক ট্যাগ যোগ করা যায়।
+
+#### কেন ট্যাগ দরকার?
+
+ধরুন আপনি জানতে চান:
+- কোন ডিভাইসগুলো প্রোডাকশনে আছে?
+- কোন ডিভাইসগুলো ক্রিটিক্যাল (যেগুলো down হলে বড় সমস্যা)?
+- কোনগুলো এখন মেইনটেনেন্সে আছে?
+
+এসবের জন্য আলাদা আলাদা ফিল্ড তৈরি করা impractical। ট্যাগ দিয়ে সহজেই করা যায়।
+
+#### ট্যাগ তৈরি করা
+
+**Extras → Tags** যান। **+ Add** ক্লিক করুন।
+
+**Production Tag:**
 
 ```
-Name: Staging
-Color: ff9800 (কমলা)
-Description: Staging/testing devices
+Name: production
+Color: 4caf50
+```
 
-Name: End-of-Life
+Color একটা হেক্স কোড। অথবা Color Picker ব্যবহার করুন। সবুজ রঙ মানে "সব ঠিক আছে, চলছে"।
+
+```
+Description: Production/live equipment actively serving customers
+
+Content Types: (খালি রাখুন)
+```
+
+Content Types খালি রাখলে সব ধরনের অবজেক্টে এই ট্যাগ ব্যবহার করা যাবে - ডিভাইস, আইপি, সার্কিট, সব জায়গায়।
+
+**Create and Add Another** ক্লিক করুন (যদি আরো ট্যাগ তৈরি করতে চান)।
+
+একইভাবে আরো কয়েকটা:
+
+**Critical Tag:**
+
+```
+Name: critical
 Color: f44336 (লাল)
-Description: Devices approaching end of life
+Description: Critical infrastructure - failure causes major outage
+```
 
-Name: Critical
-Color: 000000 (কালো)
-Description: Mission-critical infrastructure
+**Backup Tag:**
 
-Name: Backup
+```
+Name: backup
+Color: 2196f3 (নীল)
+Description: Backup/standby equipment
+```
+
+**End of Life Tag:**
+
+```
+Name: end-of-life
 Color: 9e9e9e (ধূসর)
-Description: Backup/standby devices
+Description: Equipment past end of life, replacement needed
 ```
 
-### Tag ব্যবহার করা
-
-এখন যেকোনো ডিভাইসে গিয়ে Edit করুন। নিচে **Tags** ফিল্ড দেখবেন। সেখানে ক্লিক করলে সব ট্যাগের লিস্ট আসবে। যেগুলো প্রযোজ্য সেগুলো সিলেক্ট করুন।
-
-যেমন আপনার কোর রাউটারে দিতে পারেন: `Production`, `Critical`
-
-একটা পুরোনো সুইচে দিতে পারেন: `Production`, `End-of-Life`
-
-ট্যাগের সবচেয়ে বড় সুবিধা হলো ফিল্টারিং। ডিভাইস লিস্ট পেজে গিয়ে Tags ফিল্টার দিয়ে শুধু Critical ডিভাইসগুলো দেখতে পারবেন। অথবা যেসব ডিভাইস End-of-Life ট্যাগ করা আছে সেগুলো দেখে রিপ্লেসমেন্ট প্ল্যান করতে পারবেন।
-
-## Saved Filters - বারবার একই ফিল্টার
-
-প্রায়ই একই ধরনের সার্চ করতে হয়। যেমন "মিরপুর পপের সব Active ডিভাইস" বা "সব Critical Tagged রাউটার"। প্রতিবার ফিল্টার সেট করা বিরক্তিকর। এজন্য আছে Saved Filters।
-
-### Saved Filter তৈরি
-
-যেকোনো লিস্ট পেজে যান (যেমন Devices)। উপরে ফিল্টার সেট করুন। যেমন:
-
-- Location: Mirpur POP
-- Status: Active
-- Role: Core Router
-
-ফিল্টার করার পরে URL দেখুন। অনেকগুলো প্যারামিটার দেখবেন। এখন উপরে **Save Filter** অপশন দেখবেন (ভার্সন অনুযায়ী লোকেশন ভিন্ন হতে পারে)।
-
-ক্লিক করুন। একটা নাম দিন:
+**Maintenance Tag:**
 
 ```
-Name: Mirpur Active Core Routers
+Name: maintenance
+Color: ffeb3b (হলুদ)
+Description: Currently under maintenance
 ```
 
-**Save** করুন। এখন পরেরবার যখন আসবেন, এই ফিল্টার এক ক্লিকে অ্যাপ্লাই করতে পারবেন।
+এখন **Extras → Tags** লিস্টে পাঁচটা কালারফুল ট্যাগ দেখবেন।
 
-Saved Filters আপনার ব্যক্তিগত। অন্য ইউজার দেখবে না। কিন্তু আপনি যখনই লগইন করবেন, আপনার সব Saved Filters পাবেন।
+#### ডিভাইসে ট্যাগ যোগ করা
 
-## User Management - টিম কে কী করতে পারবে
-
-একজন মানুষ একা সব কাজ করতে পারে না। টিম লাগবে। কিন্তু সবাইকে সব পারমিশন দেওয়া উচিত না। একজন জুনিয়র টেকনিশিয়ান হয়তো শুধু দেখতে পারবে, এডিট করতে পারবে না। আরেকজন সিনিয়র সব করতে পারবে।
-
-### নতুন User তৈরি
-
-আপনি যেহেতু Superuser হিসেবে লগইন আছেন, আপনি নতুন ইউজার বানাতে পারবেন।
-
-উপরের ডান কোণায় আপনার ইউজারনেমে ক্লিক করুন। ড্রপডাউনে **Admin** লিংক দেখবেন। ক্লিক করুন।
-
-এটা আপনাকে Django Admin ইন্টারফেসে নিয়ে যাবে। এখানে **Users** সেকশনে যান। **Add User** ক্লিক করুন।
+**Devices → Devices → R-DN-MIR-CORE-01 → Edit**
 
 ```
-Username: jahid
-Password: (একটা স্ট্রং পাসওয়ার্ড দিন)
+Tags: (এখানে মাল্টিপল সিলেক্ট করা যায়)
+  - production
+  - critical
 ```
 
-**Save** করুন। তারপর আরো ডিটেইলস যোগ করুন:
+দুটো ট্যাগ সিলেক্ট করুন (Ctrl চেপে রাখুন বা ড্রপডাউনে ক্লিক করুন)।
+
+**Update** করুন।
+
+ডিভাইস ডিটেইল পেজে এখন দুটো কালারফুল ব্যাজ দেখবেন:
 
 ```
-First Name: Jahid
-Last Name: Hassan
-Email: jahid@quicknet.bd
-Active: ✓ (চেক করুন)
-Staff Status: ✓ (চেক করুন - এটা দিলে Nautobot UI অ্যাক্সেস পাবে)
-Superuser Status: (আনচেক রাখুন - সবাইকে Superuser বানাবেন না)
+Tags: [production] [critical]
+```
+
+সবুজ এবং লাল ব্যাজ।
+
+একইভাবে অন্যান্য ডিভাইসে:
+
+```
+SW-DN-MIR-DIST-01
+  Tags: production
+
+SW-DN-MIR-ACC-01
+  Tags: production
+
+R-DN-MIR-CORE-02 (যদি ব্যাকআপ রাউটার থাকে)
+  Tags: backup
+```
+
+#### ট্যাগ দিয়ে ফিল্টারিং
+
+**Devices → Devices** লিস্টে যান।
+
+**Filters** প্যানেল খুলুন:
+
+```
+Tags: critical
+```
+
+শুধু critical ট্যাগ ওয়ালা ডিভাইস দেখাবে। SkyNets এর ক্ষেত্রে:
+
+```
+R-DN-MIR-CORE-01
+R-DN-UTT-CORE-01
+```
+
+দুটো কোর রাউটার।
+
+মাল্টিপল ট্যাগ দিয়েও ফিল্টার করা যায়:
+
+```
+Tags: production, critical
+```
+
+যেসব ডিভাইসে **উভয়** ট্যাগ আছে শুধু সেগুলো দেখাবে।
+
+#### ট্যাগ এর প্র্যাক্টিক্যাল ব্যবহার
+
+**Scenario 1: মেইনটেনেন্স উইন্ডো**
+
+মিরপুর কোর রাউটারে একটা ফার্মওয়্যার আপগ্রেড করতে হবে। রাত ২টায় কাজ শুরু হবে, ৪টায় শেষ।
+
+কাজ শুরুর আগে:
+
+```
+R-DN-MIR-CORE-01 → Edit
+  Status: Offline (Active থেকে চেঞ্জ করুন)
+  Tags: maintenance যোগ করুন
+  Comments: "Firmware upgrade in progress. Scheduled: 2025-02-10 02:00-04:00 AM. Contact: Asif +880 1712-345678"
+```
+
+এখন যে কেউ Nautobot দেখলে বুঝবে এই রাউটার মেইনটেনেন্সে আছে।
+
+কাজ শেষ হলে:
+
+```
+Status: Active
+Tags: maintenance রিমুভ করুন
+Comments: "Firmware upgraded to v7.12. Completed: 2025-02-10 03:45 AM"
+```
+
+**Scenario 2: EOL (End of Life) ট্র্যাকিং**
+
+কিছু পুরোনো সুইচ আছে যেগুলো ৫ বছর হয়ে গেছে, রিপ্লেস করা দরকার:
+
+```
+SW-DN-MIR-ACC-05 → Edit
+  Tags: end-of-life যোগ করুন
+  Comments: "Purchased 2020. Frequent issues. Replacement budgeted for Q2 2025."
+```
+
+এখন বাজেট মিটিংয়ে:
+
+```
+Filters → Tags: end-of-life
+```
+
+সব EOL ডিভাইসের লিস্ট। Export করে Excel এ নিন, টোটাল রিপ্লেসমেন্ট কস্ট ক্যালকুলেট করুন।
+
+---
+
+### Saved Filters - কমন কোয়েরি সেভ করা
+
+আসিফ প্রতিদিন সকালে Nautobot এ যায় এবং মিরপুর পপের সব এক্টিভ ডিভাইস চেক করে। প্রতিদিন একই ফিল্টার:
+
+```
+Location: Mirpur POP
+Status: Active
+```
+
+এটা প্রতিদিন সেট করা বিরক্তিকর। Saved Filter দিয়ে সহজ করা যায়।
+
+#### একটা Saved Filter তৈরি করা
+
+**Devices → Devices** লিস্টে যান।
+
+ফিল্টার সেট করুন:
+
+```
+Location: Mirpur POP
+Status: Active
+```
+
+**Apply** করুন। লিস্টে শুধু মিরপুরের এক্টিভ ডিভাইস দেখাবে।
+
+এখন উপরে ডান দিকে **Save Filter** বাটন দেখবেন। ক্লিক করুন।
+
+একটা ছোট ডায়ালগ বক্স:
+
+```
+Name: Mirpur Active Devices
+Public: ☐ (আনচেক রাখুন)
+```
+
+Public চেক করলে অন্য ইউজাররাও এই ফিল্টার দেখবে। আনচেক থাকলে শুধু আপনি দেখবেন।
+
+**Save** ক্লিক করুন।
+
+এখন পরের বার **Devices → Devices** লিস্টে গেলে উপরে **Saved Filters** নামে একটা ড্রপডাউন দেখবেন। ক্লিক করলে:
+
+```
+Saved Filters
+  └── Mirpur Active Devices
+```
+
+এটা সিলেক্ট করলেই ফিল্টার অটোমেটিক্যালি এপ্লাই হয়ে যাবে। এক ক্লিকে কাজ শেষ!
+
+#### আরো কিছু Useful Saved Filters
+
+**Critical Infrastructure:**
+
+```
+Tags: critical
+Name: Critical Infrastructure Only
+Public: Yes (সবাই দেখুক)
+```
+
+**Warranty Expiring Soon:**
+
+```
+Warranty Expiry Date:
+  After: 2025-02-09 (আজ)
+  Before: 2025-05-09 (৯০ দিন পরে)
+Name: Warranty Expiring in 90 Days
+```
+
+**Access Switches - All Locations:**
+
+```
+Role: Access Switch
+Status: Active
+Name: All Active Access Switches
+```
+
+**Devices Under Maintenance:**
+
+```
+Tags: maintenance
+Name: Currently Under Maintenance
+```
+
+এভাবে আপনার frequent queries সেভ করে রাখুন। সময় বাঁচবে এবং consistency থাকবে।
+
+---
+
+### User Management এবং Permissions
+
+SkyNets Bangladesh এর তিন ধরনের ইউজার আছে:
+
+১. **NOC Team** (জাহাঙ্গীর, আসিফ, রহিম): সবকিছু দেখতে এবং এডিট করতে পারবে
+২. **Field Operations** (করিম, সালমান): শুধু ডিভাইস এবং ক্যাবল ম্যানেজ করবে
+৩. **Management** (রফিক সাহেব - CTO): শুধু রিপোর্ট দেখবে, কিছু এডিট করবে না
+
+প্রতিটা টিমের জন্য আলাদা permission লেভেল দরকার।
+
+#### Groups তৈরি করা
+
+Nautobot এ Groups দিয়ে permissions ম্যানেজ করা হয়। একটা গ্রুপে permissions সেট করুন, তারপর ইউজারদের সেই গ্রুপে যোগ করুন।
+
+উপরের ডান কোণায় আপনার ইউজারনেম (admin) ক্লিক করুন → **Admin** সিলেক্ট করুন।
+
+Django Admin প্যানেলে চলে যাবেন। এখানে **Groups** দেখবেন। ক্লিক করুন।
+
+**+ Add Group** বাটনে ক্লিক করুন।
+
+**Group 1: NOC Team**
+
+```
+Name: NOC Team
+```
+
+এখন Permissions সিলেক্ট করতে হবে। নিচে একটা বড় বক্স দেখবেন **Available permissions** এবং **Chosen permissions**।
+
+বাম দিকে (Available) থেকে ডান দিকে (Chosen) মুভ করতে হবে যেগুলো দরকার।
+
+এটা একটু সময় সাপেক্ষ কারণ অনেক permissions আছে। আমরা ক্যাটেগরি অনুযায়ী দেখব:
+
+**DCIM - Device Permissions:**
+
+```
+dcim | device | Can view device
+dcim | device | Can add device
+dcim | device | Can change device
+```
+
+লক্ষ্য করুন "Can delete device" সিলেক্ট করছি না। NOC ডিভাইস ডিলিট করতে পারবে না (ভুল করে ডিলিট হয়ে যাওয়ার ভয়)।
+
+**DCIM - Cable Permissions:**
+
+```
+dcim | cable | Can view cable
+dcim | cable | Can add cable
+dcim | cable | Can change cable
+```
+
+**DCIM - Interface Permissions:**
+
+```
+dcim | interface | Can view interface
+dcim | interface | Can change interface
+```
+
+**IPAM - IP Address Permissions:**
+
+```
+ipam | ip address | Can view IP address
+ipam | ip address | Can add IP address
+ipam | ip address | Can change IP address
+```
+
+**IPAM - Prefix Permissions:**
+
+```
+ipam | prefix | Can view prefix
+ipam | prefix | Can add prefix
+ipam | prefix | Can change prefix
+```
+
+**Circuits - Limited Access:**
+
+```
+circuits | circuit | Can view circuit
+```
+
+শুধু view, add/change/delete না। কারণ সার্কিট যোগ/পরিবর্তন করা ম্যানেজমেন্ট লেভেলের কাজ।
+
+**Organization - Location (View Only):**
+
+```
+Organization | location | Can view location
+```
+
+NOC লোকেশন দেখবে কিন্তু নতুন লোকেশন যোগ বা মুছবে না।
+
+এভাবে সব relevant permissions সিলেক্ট করুন। তারপর **Save** ক্লিক করুন।
+
+**Group 2: Field Operations**
+
+```
+Name: Field Operations
+```
+
+**Permissions:**
+
+```
+dcim | device | Can view device
+dcim | device | Can add device (নতুন এক্সেস সুইচ ইনস্টল করার পরে যোগ করবে)
+dcim | device | Can change device (Comments আপডেট করবে)
+
+dcim | cable | Can view cable
+dcim | cable | Can add cable
+dcim | cable | Can change cable
+
+dcim | interface | Can view interface
+dcim | interface | Can change interface (পোর্ট enable/disable করবে)
+
+ipam | ip address | Can view IP address
+```
+
+লক্ষ্য করুন - IP address শুধু view, add/change না। ফিল্ড টিম আইপি এলোকেশন করবে না, NOC করবে।
+
+**Save** করুন।
+
+**Group 3: Management**
+
+```
+Name: Management
+```
+
+**Permissions:**
+
+সব জায়গায় শুধু **Can view** সিলেক্ট করুন। কোনো add/change/delete না।
+
+```
+dcim | device | Can view device
+dcim | cable | Can view cable
+dcim | interface | Can view interface
+dcim | rack | Can view rack
+ipam | ip address | Can view IP address
+ipam | prefix | Can view prefix
+ipam | vlan | Can view vlan
+circuits | circuit | Can view circuit
+circuits | provider | Can view provider
+Organization | location | Can view location
 ```
 
 **Save** করুন।
 
-### Group তৈরি এবং Permission সেট
+#### নতুন ইউজার তৈরি করা
 
-এখন Group তৈরি করুন। Django Admin-এ **Groups** সেকশনে যান। **Add Group** ক্লিক করুন।
+এখন actual users তৈরি করি।
 
-```
-Name: Network Operators
-```
+Django Admin প্যানেলে **Users** এ যান। **+ Add User** ক্লিক করুন।
 
-এখন Permissions সিলেক্ট করুন। অনেকগুলো পারমিশন দেখবেন। একটু ধৈর্য নিয়ে সিলেক্ট করুন।
-
-একটা সাধারণ Network Operator-এর জন্য এইগুলো দিতে পারেন:
-
-**DCIM permissions:**
-- Can view device
-- Can add device
-- Can change device
-- Can view interface
-- Can change interface
-- Can view cable
-- Can add cable
-
-**IPAM permissions:**
-- Can view IP address
-- Can add IP address
-- Can change IP address
-- Can view prefix
-
-মানে তারা ডিভাইস, ইন্টারফেস, ক্যাবল, আইপি দেখতে পারবে আর এডিট করতে পারবে। কিন্তু ডিলিট করতে পারবে না।
-
-**Save** করুন।
-
-এখন ইউজার `jahid`-কে এই গ্রুপে যোগ করুন। Users সেকশনে গিয়ে jahid এডিট করুন। **Groups** ফিল্ডে "Network Operators" সিলেক্ট করুন।
-
-এখন jahid যখন লগইন করবে, সে ডিভাইস দেখতে পারবে, এডিট করতে পারবে, কিন্তু ডিলিট করতে পারবে না।
-
-### আরেকটা Group: Read-Only Users
-
-ধরুন আপনার ম্যানেজমেন্ট টিম নেটওয়ার্ক দেখতে চায় কিন্তু কিছু এডিট করবে না।
+**ইউজার: আসিফ (NOC Team)**
 
 ```
-Name: Read-Only Users
+Username: asif
+Password: (একটা শক্তিশালী পাসওয়ার্ড দিন)
+Password confirmation: (আবার টাইপ করুন)
+```
+
+**Save and continue editing** ক্লিক করুন।
+
+এখন আরো ফিল্ড দেখাবে:
+
+```
+Personal Info:
+  First name: Asif
+  Last name: Rahman
+  Email address: asif@skynets.bd
 
 Permissions:
-- Can view device
-- Can view interface
-- Can view IP address
-- Can view prefix
-- Can view VLAN
-- Can view cable
-(শুধু view permissions)
+  Active: ☑ (চেক করুন - না হলে লগইন করতে পারবে না)
+  Staff status: ☑ (চেক করুন - এটা থাকলে Nautobot admin প্যানেলে access পাবে)
+  Superuser status: ☐ (আনচেক - superuser শুধু আপনি থাকবেন)
+
+Groups:
+  NOC Team (এখানে সিলেক্ট করুন)
 ```
 
-এই গ্রুপে যারা থাকবে তারা সব দেখতে পারবে কিন্তু কোনো চেঞ্জ করতে পারবে না।
+Groups সেকশনে Available groups থেকে "NOC Team" সিলেক্ট করে ডান দিকে মুভ করুন।
 
-## Quick Tips সমূহ
+**Save** ক্লিক করুন।
 
-কিছু টিপস যা আপনার দৈনন্দিন কাজ সহজ করবে:
+একইভাবে আরো দুজন:
 
-### ১. Bookmarklet তৈরি করুন
-
-আপনি যদি প্রতিদিন একটা নির্দিষ্ট ফিল্টার করা লিস্ট দেখেন (যেমন আপনার দায়িত্বের সাইটের ডিভাইস), সেই পেজের URL ব্রাউজারে বুকমার্ক করুন। এক ক্লিকে চলে যাবেন।
-
-### ২. Search Syntax শিখুন
-
-Nautobot-এর সার্চ বক্স অনেক স্মার্ট। আপনি লিখতে পারেন:
-
-- `role:core` - সব core role ডিভাইস
-- `status:active site:mirpur` - মিরপুরের সব active জিনিস
-- `tag:critical` - critical ট্যাগ করা সব কিছু
-
-### ৩. Bulk Edit ব্যবহার করুন
-
-যদি একসাথে অনেকগুলো অবজেক্ট এডিট করতে হয়, লিস্ট ভিউতে চেকবক্স দিয়ে সিলেক্ট করুন। তারপর উপরে **Bulk Edit** অপশন আসবে। একসাথে সব এডিট করতে পারবেন।
-
-### ৪. Export এবং Import Cycle
-
-একটা ভালো প্র্যাক্টিস: মাসে একবার সব ডিভাইসের লিস্ট CSV-তে Export করুন। সেভ করে রাখুন। এটা ব্যাকআপ হিসেবে কাজ করবে। আর যদি কখনো ভুল করে কিছু ডিলিট হয়ে যায়, CSV থেকে Import করে ফেলতে পারবেন।
-
-### ৫. Comments ফিল্ড ম্যাক্সিমাম ব্যবহার করুন
-
-গুরুত্বপূর্ণ যেকোনো তথ্য Comments ফিল্ডে লিখুন। কনফিগ চেঞ্জের হিস্টরি, সমস্যা হওয়ার ইতিহাস, কন্টাক্ট পার্সন - সব। এটা ভবিষ্যতে অমূল্য রেফারেন্স হবে।
-
-## একটা কমপ্লিট উদাহরণ: মিরপুর পপ সম্পূর্ণ সেটআপ
-
-চলুন এখন পর্যন্ত যা শিখলাম সেটা দিয়ে মিরপুর পপের একটা কমপ্লিট পিকচার তৈরি করি।
-
-### ধাপ ১: Provider এবং Circuit
+**করিম (Field Operations):**
 
 ```
-Provider: BTCL
-Circuit: BTCL-MIR-001 (10 Gbps Fiber)
-Connected to: R-MIR-CORE-01, sfpplus1
+Username: karim
+First name: Karim
+Last name: Uddin
+Email: karim@skynets.bd
+Active: ☑
+Staff status: ☑
+Groups: Field Operations
 ```
 
-### ধাপ ২: Core Infrastructure
+**রফিক সাহেব (Management):**
 
 ```
-Device: R-MIR-CORE-01
-Type: MikroTik CCR2004
-Role: Core Router
-Tags: Production, Critical
-Custom Fields:
-  - Warranty Expiry: 2027-01-15
-  - Purchase Source: International Import
-  - Power Consumption: 40W
+Username: rafiq
+First name: Rafiq
+Last name: Ahmed
+Email: rafiq@skynets.bd
+Active: ☑
+Staff status: ☑
+Groups: Management
 ```
 
-### ধাপ ৩: Distribution Layer
+#### Permissions টেস্ট করা
+
+এখন লগআউট করুন admin থেকে। asif দিয়ে লগইন করুন:
 
 ```
-Device: SW-MIR-DIST-01
-Type: Cisco Catalyst 2960
-Role: Distribution Switch
-Cable from R-MIR-CORE-01 sfpplus2 to SW-MIR-DIST-01 sfpplus1 (Blue Fiber, 5m)
-Tags: Production
+Username: asif
+Password: (যেটা দিয়েছিলেন)
 ```
 
-### ধাপ ৪: Access Layer (3টা সুইচ)
+লগইন করার পরে Nautobot হোম পেজে আসবেন।
 
-CSV দিয়ে ইমপোর্ট:
+**Devices → Devices** লিস্টে যান।
 
-```csv
-name,device_type,role,location,rack,status,tags
-SW-MIR-ACC-01,Cisco Catalyst 2960,Access Switch,Mirpur POP,Rack-A,Active,production
-SW-MIR-ACC-02,Cisco Catalyst 2960,Access Switch,Mirpur POP,Rack-A,Active,production
-SW-MIR-ACC-03,Cisco Catalyst 2960,Access Switch,Mirpur POP,Rack-A,Active,production
-```
+একটা ডিভাইস ক্লিক করুন - দেখতে পারছেন।
 
-### ধাপ ৫: Cable Connections
+**Edit** বাটন আছে - ক্লিক করুন, এডিট করতে পারছেন।
 
-প্রতিটা Access Switch Core Router বা Distribution Switch-এর সাথে কানেক্টেড:
+কিন্তু **Delete** বাটন নেই! Permission নেই বলে।
 
-```
-SW-MIR-ACC-01 ether24 <--(Yellow Cat6, 10m)--> SW-MIR-DIST-01 ether1
-SW-MIR-ACC-02 ether24 <--(Yellow Cat6, 12m)--> SW-MIR-DIST-01 ether2
-SW-MIR-ACC-03 ether24 <--(Yellow Cat6, 15m)--> SW-MIR-DIST-01 ether3
-```
+**Organization → Locations** যান।
 
-### ধাপ ৬: IP Addressing
+লিস্ট দেখতে পারছেন। কিন্তু **+ Add** বাটন নেই। নতুন লোকেশন যোগ করতে পারবেন না।
+
+পারফেক্ট! Permission কাজ করছে।
+
+এখন লগআউট করুন। rafiq দিয়ে লগইন করুন (ম্যানেজমেন্ট গ্রুপ):
 
 ```
-R-MIR-CORE-01:
-  - lo0: 10.10.1.1/32 (Loopback/Management)
-  - sfpplus1: 103.92.40.2/30 (BTCL Uplink)
-  - ether1: 10.10.10.1/24 (Distribution Network)
-
-SW-MIR-DIST-01:
-  - vlan10: 10.10.10.2/24 (Management)
+Username: rafiq
+Password: ...
 ```
 
-### ধাপ ৭: VLANs
+লগইন করার পরে:
 
-```
-VLAN 10: MANAGEMENT (All network devices)
-VLAN 100: RESIDENTIAL_MIRPUR (Customer traffic)
-VLAN 200: CORPORATE_MIRPUR (Corporate clients)
-```
+**Devices → Devices** - লিস্ট দেখতে পারছেন।
 
-এই সেটআপ হয়ে গেলে আপনার মিরপুর পপের একটা সম্পূর্ণ ডিজিটাল টুইন তৈরি হয়ে গেছে Nautobot-এ। যে কেউ লগইন করে পুরো নেটওয়ার্ক বুঝতে পারবে।
+কিন্তু কোথাও **Edit**, **Delete**, **+ Add** কোনো বাটন নেই!
 
-## কী শিখলাম আমরা?
+সম্পূর্ণ রিড-অনলি। রফিক সাহেব শুধু রিপোর্ট দেখতে পারবেন, ভুল করে কিছু চেঞ্জ করতে পারবেন না।
 
-এই চ্যাপ্টারে আমরা দেখলাম কীভাবে:
+চমৎকার!
 
-১. **Provider এবং Circuit** সেটআপ করতে হয় - কোথা থেকে ইন্টারনেট আসছে সেটা ডকুমেন্ট করা
+---
 
-২. **Cable Management** করতে হয় - কোন তার কোথায় গেছে সেটা ট্র্যাক করা
+### চ্যাপ্টার সারাংশ
 
-৩. **Custom Fields** তৈরি করতে হয় - নিজের প্রয়োজন অনুযায়ী ফিল্ড যোগ করা
+এই চ্যাপ্টারে আমরা শিখলাম:
 
-৪. **Tags** ব্যবহার করতে হয় - সহজে ক্যাটাগরাইজ এবং ফিল্টার করা
+**Custom Fields:**
+- Warranty Expiry Date tracking করা
+- Building Name tracking করা
+- Power Consumption, Purchase Source ইত্যাদি
+- Custom Fields দিয়ে filtering করা
 
-৫. **User এবং Permission** ম্যানেজ করতে হয় - টিম মেম্বারদের সঠিক অ্যাক্সেস দেওয়া
+**Tags:**
+- production, critical, backup, end-of-life, maintenance
+- ডিভাইসে মাল্টিপল ট্যাগ যোগ করা
+- ট্যাগ দিয়ে filtering
+- মেইনটেনেন্স এবং EOL tracking
 
-এখন আপনার Nautobot সেটআপ প্রায় কমপ্লিট। আপনার নেটওয়ার্কের একটা পরিপূর্ণ ডিজিটাল রিপ্রেজেন্টেশন তৈরি হয়ে গেছে। পরের চ্যাপ্টারে আমরা দেখব রিয়েল ওয়ার্ল্ড ইমপ্লিমেন্টেশন - কীভাবে ছোট আইএসপি থেকে বড় আইএসপিতে স্কেল করবেন, কোন কোন চ্যালেঞ্জ আসবে আর সেগুলোর সমাধান কী।
+**Saved Filters:**
+- কমন কোয়েরি সেভ করা
+- এক ক্লিকে ফিল্টার এপ্লাই করা
+- টিম members এর সাথে শেয়ার করা
+
+**User Management:**
+- Groups তৈরি করা (NOC Team, Field Ops, Management)
+- Permissions configure করা (view, add, change, delete)
+- নতুন ইউজার তৈরি করা
+- গ্রুপে ইউজার যোগ করা
+- Permissions টেস্ট করা
+
+SkyNets Bangladesh এখন Nautobot কে তাদের নিজস্ব প্রয়োজন অনুযায়ী সাজিয়ে ফেলেছে। আসিফের ওয়ারেন্টি ট্র্যাকিং সমস্যা solve হয়েছে। করিম এখন সহজেই বিল্ডিং নাম দিয়ে সুইচ খুঁজে পায়। রফিক সাহেব নিরাপদে রিপোর্ট দেখতে পারেন ভুলে কিছু চেঞ্জ হওয়ার ভয় ছাড়া।
+
+পরের চ্যাপ্টারে আমরা দেখব কীভাবে ৮ হাজার কাস্টমার থেকে ৫০ হাজার কাস্টমারে স্কেল করা যায়, কী কী চ্যালেঞ্জ আসে, এবং কীভাবে Nautobot সেই জার্নিতে সাহায্য করে।
+
+---

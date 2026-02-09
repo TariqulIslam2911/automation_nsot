@@ -1,566 +1,1580 @@
-আগের চ্যাপ্টারে আমরা Nautobot ইনস্টল করেছি আর ডেটা মডেল বুঝেছি। এখন আসল কাজ শুরু করার সময় - আপনার নেটওয়ার্কের ডেটা Nautobot-এ ঢোকানো। এই চ্যাপ্টারটা হবে সম্পূর্ণ হ্যান্ডস-অন। আমরা ধাপে ধাপে দেখব কীভাবে ওয়েব ইন্টারফেস ব্যবহার করে ডেটা এন্ট্রি করতে হয়, কীভাবে CSV দিয়ে বাল্ক ইমপোর্ট করতে হয়, আর কীভাবে ভুলগুলো এড়ানো যায়।
+আগের চ্যাপ্টারে আমরা Nautobot 3.0 এর ডেটা মডেল বুঝলাম - Organization, DCIM, IPAM, Circuits, Extras। এখন সময় এসেছে হাতে-কলমে কাজ শুরু করার। এই চ্যাপ্টারে আমরা দেখব কীভাবে Nautobot এর ওয়েব UI ব্যবহার করে actual ডেটা এন্ট্রি করতে হয়।
 
-আমাদের উদাহরণ হিসেবে থাকবে "QuickNet Bangladesh" নামের আরেকটা আইএসপি। যাতে আপনারা বলতে না পারেন, আমি খালি একটা নাম নিয়েই পড়ে থাকি। তো, তাদের একটা পপ আছে মিরপুরে, প্রায় দুই হাজার রেসিডেনশিয়াল কাস্টমার। তারা সবেমাত্র Nautobot সেটআপ করেছে, এখন ডেটা এন্ট্রি শুরু করবে।
+SkyNet Bangladesh এর NOC টিম এখন তাদের মিরপুর এবং উত্তরা পপের সম্পূর্ণ নেটওয়ার্ক Nautobot এ ডকুমেন্ট করবে। তাদের সাথে একসাথে আমরাও শিখব। শুরু করা যাক।
 
-### ওয়েব ইন্টারফেস নেভিগেশন
+### Nautobot 3.0 UI Overview
 
-প্রথমে Nautobot-এ লগইন করুন। ব্রাউজারে `http://your-server-ip:8080` যান (অথবা আপনার সেটআপ করা ডোমেইন)। আপনার সুপারইউজার ক্রেডেনশিয়াল দিয়ে লগইন করুন।
+প্রথমে একবার Nautobot UI এর সাথে পরিচিত হয়ে নিই।
 
-লগইন করার পরে আপনি দেখবেন Nautobot-এর হোম পেজ। উপরে একটা নেভিগেশন বার আছে যেখানে কয়েকটা মূল মেনু:
+#### লগইন এবং ড্যাশবোর্ড
 
-**Organization:** টেন্যান্ট, টিম, লোকেশন ম্যানেজমেন্ট
-**Devices:** ডিভাইস, র‍্যাক, ক্যাবল
-**IPAM:** আইপি অ্যাড্রেস, প্রিফিক্স, ভিল্যান
-**Circuits:** প্রোভাইডার, সার্কিট
-**Extras:** ট্যাগ, কাস্টম ফিল্ড
+ব্রাউজারে যান:
 
-প্রতিটা মেনুতে ক্লিক করলে একটা ড্রপডাউন আসবে যেখানে সাব-মেনু থাকবে। ইন্টারফেসটা বেশ ইনটিউইটিভ - একটু ঘাটাঘাটি করলেই বুঝে যাবেন কোথায় কী আছে।
+```
+https://nautobot.skynet.bd
+```
 
-ডান দিকে উপরে কোণায় একটা সার্চ বক্স আছে। এটা খুবই পাওয়ারফুল - যেকোনো কিছু সার্চ করতে পারবেন। যেমন একটা ডিভাইসের নাম লিখলেই সেই ডিভাইস বের হবে।
+লগইন করুন:
+```
+Username: admin
+Password: SkyNet@Admin2025!
+```
 
-### ম্যানুয়াল ডেটা এন্ট্রি - প্রথম সাইট তৈরি
+লগইন করার পরে আপনি ড্যাশবোর্ডে আসবেন। প্রথমবার লগইন করলে ড্যাশবোর্ড খালি দেখাবে - এটা স্বাভাবিক। এখনও কোনো ডেটা নেই।
 
-চলুন QuickNet Bangladesh-এর জন্য প্রথম সাইট তৈরি করি। মিরপুর পপ।
+#### নেভিগেশন বার
 
-### স্টেপ ১: Location Type তৈরি
+উপরে একটা নেভিগেশন বার দেখবেন। এখানে মূল মেনুগুলো:
 
-নতুন ভার্সনে Nautobot Sites-এর পরিবর্তে Locations ইউজ করে। প্রথমে একটা Location Type তৈরি করতে হবে।
+**Organization:** Locations, Teams, Tenants, Contacts
 
-নেভিগেশন বারে **Organization → Location Types** যান। ডান দিকে উপরে **+ Add** বাটনে ক্লিক করুন।
+**Devices:** Device Types, Manufacturers, Devices, Racks, Cables, Device Redundancy Groups
 
-একটা ফর্ম আসবে। পূরণ করুন:
+**IPAM:** Namespaces, Prefixes, IP Addresses, VLANs, VLAN Groups, RIRs
+
+**Circuits:** Providers, Circuit Types, Circuits
+
+**Power:** Power Feeds, Power Panels (আমরা এগুলো ব্যবহার করব না এই বইতে)
+
+**Extras:** Roles, Statuses, Tags, Custom Fields, Relationships, Jobs, Git Repositories
+
+**Plugins:** (যদি কোনো plugin ইনস্টল করা থাকে)
+
+#### সার্চ ফিচার
+
+ডান দিকে উপরের কোণায় একটা সার্চ বক্স দেখবেন। এটা গ্লোবাল সার্চ - যেকোনো কিছু এখানে টাইপ করলে Nautobot সব জায়গায় খুঁজবে।
+
+টেস্ট করুন - টাইপ করুন "mirpur" (এখনও কিছু পাবেন না কারণ ডেটা নেই)।
+
+#### ইউজার মেনু
+
+একদম ডান দিকে উপরের কোণায় আপনার ইউজারনেম দেখবেন। ক্লিক করলে একটা ড্রপডাউন:
+
+- **Profile:** আপনার প্রোফাইল দেখুন/এডিট করুন
+- **Preferences:** UI সেটিংস (items per page, theme ইত্যাদি)
+- **API Tokens:** API টোকেন ম্যানেজ করুন
+- **Change Password:** পাসওয়ার্ড চেঞ্জ করুন
+- **Logout:** লগআউট
+
+---
+
+### লোকেশন হায়ারার্কি তৈরি করা
+
+প্রথম কাজ হলো Location Hierarchy সেটআপ করা। এটা Nautobot 3.0 এর সবচেয়ে ইম্পর্ট্যান্ট ফিচার।
+
+#### স্টেপ ১: Location Types ডিফাইন করা
+
+**Organization → Location Types** যান।
+
+খালি পেজ দেখাবে। ডান দিকে উপরে **+ Add** বাটনে ক্লিক করুন।
+
+**প্রথম Location Type: Zone**
+
+```
+Name: Zone
+Description: Geographic coverage zone
+Nestable: ✓ (চেক করুন)
+Content Types: (খালি রাখুন - সব কিছুতে ইউজ হতে পারে)
+```
+
+**Create** ক্লিক করুন।
+
+এখন আরেকটা - **+ Add** আবার ক্লিক করুন।
+
+**দ্বিতীয় Location Type: Cluster**
+
+```
+Name: Cluster
+Description: Group of nearby POPs for operational management
+Nestable: ✓
+Parent Location Type: Zone (এটা ড্রপডাউন থেকে সিলেক্ট করুন)
+```
+
+**Create** করুন।
+
+**তৃতীয় Location Type: POP**
 
 ```
 Name: POP
-Description: Point of Presence - ISP network location
-Nestable: ✓ (চেক করুন)
+Description: Point of Presence - ISP network node
+Nestable: ✓
+Parent Location Type: Cluster
 ```
 
-**Create** বাটনে ক্লিক করুন। আপনার প্রথম Location Type তৈরি হয়ে গেল।
+**চতুর্থ Location Type: Rack**
 
-### স্টেপ ২: Location তৈরি
+```
+Name: Rack
+Description: Equipment rack
+Nestable: ✗ (আনচেক রাখুন - এর নিচে আর কিছু হবে না)
+Parent Location Type: POP
+```
 
-এবার আসল লোকেশন তৈরি করবেন। **Organization → Locations** যান। **+ Add** ক্লিক করুন।
+এখন আপনার চারটা Location Type তৈরি হয়েছে। **Organization → Location Types** এ গিয়ে দেখুন - সব লিস্টেড দেখাবে।
 
-ফর্মে এই তথ্য দিন:
+#### স্টেপ ২: Actual Locations তৈরি করা
+
+এখন real locations তৈরি করব।
+
+**Organization → Locations** যান। **+ Add** ক্লিক করুন।
+
+**Top Level Location: Dhaka North Zone**
+
+```
+Name: Dhaka North Zone
+Location Type: Zone (ড্রপডাউন থেকে সিলেক্ট করুন)
+Status: Active (ড্রপডাউন থেকে)
+Parent Location: (খালি রাখুন - এটা top level)
+Tenant: (খালি রাখুন)
+Description: Northern Dhaka metropolitan area coverage
+```
+
+**Create** ক্লিক করুন।
+
+এখন ভেতরে ঢুকুন - **Mirpur Cluster** তৈরি করব।
+
+আবার **Organization → Locations → + Add** যান।
+
+```
+Name: Mirpur Cluster
+Location Type: Cluster
+Status: Active
+Parent Location: Dhaka North Zone (এটা খুব ইম্পর্ট্যান্ট!)
+Description: Mirpur and Kalyanpur area operations cluster
+```
+
+**Create** করুন।
+
+এবার Mirpur POP:
 
 ```
 Name: Mirpur POP
-Location Type: POP (যেটা এইমাত্র বানালেন)
+Location Type: POP
 Status: Active
-Tenant: (খালি রাখুন আপাতত)
-Description: Primary Point of Presence in Mirpur
-Physical Address: House xx, Road 10, Mirpur-12, Dhaka-1216
-Shipping Address: (Same as Physical Address)
-Latitude: 2x.8103
-Longitude: 9x.3654
-Contact Name: Jahid Hassan
-Contact Phone: +880 1712-3456789
-Contact Email: jahid@quicknet.bd
-```
-
-GPS কোঅর্ডিনেট কীভাবে পাবেন? Google Maps-এ আপনার লোকেশন সার্চ করুন, রাইট ক্লিক করে "What's here?" সিলেক্ট করুন। নিচে ল্যাটিটিউড-লঙ্গিটিউড দেখাবে।
-
-**Create** বাটনে ক্লিক করুন। অভিনন্দন! আপনার প্রথম লোকেশন তৈরি হয়ে গেছে।
-
-### স্টেপ ৩: Rack তৈরি
-
-এবার মিরপুর পপে একটা র‍্যাক যুক্ত করবেন। **Devices → Racks** যান। **+ Add** ক্লিক করুন।
-
-```
-Name: Rack-A
-Location: Mirpur POP
-Status: Active
-Facility ID: MIR-RACK-A (অপশনাল, আপনার নিজস্ব ট্র‍্যাকিং নাম্বার)
-Type: 4-post cabinet
-Width: 19 inches
-Height: 42U
-Description: Primary equipment rack
-```
-
-**Create** ক্লিক করুন। র‍্যাক তৈরি হয়ে গেল।
-
-### স্টেপ ৪: Manufacturer ও Device Type তৈরি
-
-ডিভাইস যুক্ত করার আগে ম্যানুফ্যাকচারার আর ডিভাইস টাইপ তৈরি করতে হবে। ধরুন QuickNet MikroTik রাউটার ইউজ করে।
-
-**Devices → Manufacturers** যান। **+ Add** ক্লিক করুন।
-
-```
-Name: MikroTik
-Description: MikroTik - Latvian network equipment manufacturer
+Parent Location: Mirpur Cluster
+Facility: Mirpur-12 Data Center
+Physical Address: House 25, Road 10, Mirpur-12, Dhaka-1216, Bangladesh
+Shipping Address: (Same as physical address)
+Latitude: 23.8103
+Longitude: 90.3654
+Contact Name: Jahangir Khan
+Contact Phone: +880 1712-345678
+Contact Email: jahangir@skynet.bd
+Time Zone: Asia/Dhaka
+Description: Primary POP serving Mirpur area. Approximately 4000 customers.
+Comments: 
+  - Established: January 2023
+  - Building: 3-story commercial building
+  - Power: Dual utility feed + 50 KVA generator backup
+  - Cooling: 2x 5-ton AC units
 ```
 
 **Create** করুন।
 
-এবার **Devices → Device Types** যান। **+ Add** ক্লিক করুন।
+**GPS Coordinates কীভাবে পাবেন?**
+
+Google Maps এ যান → আপনার লোকেশন সার্চ করুন → রাইট ক্লিক → "What's here?" → নিচে coordinates দেখাবে → কপি করুন।
+
+এখন একইভাবে Uttara Cluster এবং Uttara POP তৈরি করুন:
+
+**Uttara Cluster:**
 
 ```
-Manufacturer: MikroTik
-Model: CCR2004-16G-2S+
-Part Number: CCR2004-16G-2S+ (অপশনাল)
-Height: 1U
-Is Full Depth: ✓
+Name: Uttara Cluster
+Location Type: Cluster
+Status: Active
+Parent Location: Dhaka North Zone
+Description: Uttara and Baridhara area operations cluster
 ```
 
-**Create** করুন।
+**Uttara POP:**
 
-### স্টেপ ৫: Device Role তৈরি
+```
+Name: Uttara POP
+Location Type: POP
+Status: Active
+Parent Location: Uttara Cluster
+Facility: Uttara Sector-7 Office
+Physical Address: Plot 15, Road 12, Sector-7, Uttara, Dhaka-1230, Bangladesh
+Latitude: 23.8759
+Longitude: 90.3795
+Contact Name: Asif Rahman
+Contact Phone: +880 1811-234567
+Contact Email: asif@skynet.bd
+Time Zone: Asia/Dhaka
+Description: Secondary POP serving Uttara area. Approximately 4000 customers.
+```
+
+এখন **Organization → Locations** এ যান। আপনার লোকেশন হায়ারার্কি দেখুন:
+
+```
+Dhaka North Zone
+  ├── Mirpur Cluster
+  │    └── Mirpur POP
+  └── Uttara Cluster
+       └── Uttara POP
+```
+
+চমৎকার! লোকেশন স্ট্রাকচার রেডি।
+
+---
+
+### Unified Roles সেটআপ
+
+Nautobot 3.0 এর একটা বড় চেঞ্জ হলো Unified Roles। এখন **Extras → Roles** এ সব roles থাকবে।
+
+#### ডিভাইস Roles তৈরি করা
 
 **Extras → Roles** যান। **+ Add** ক্লিক করুন।
 
+**প্রথম Role: Core Router**
+
 ```
 Name: Core Router
-Weight: 1000 (যত বেশি, তত গুরুত্বপূর্ণ)
-Color: 2196f3 (নীল রঙ)
-Description: Core routing equipment
-Content Types: dcim | device (এটা নির্বাচন করুন)
+Content Types: dcim | device (এটা খুব ইম্পর্ট্যান্ট - এই dropdown থেকে সিলেক্ট করুন)
+Color: f44336 (লাল রঙের হেক্স কোড)
+Weight: 1000 (যত বেশি, তত important)
+Description: Core routing equipment at the heart of the network
 ```
 
 **Create** করুন।
 
-### স্টেপ ৬: Device তৈরি - মূল কাজ
+কালার কীভাবে বেছে নেবেন? Color picker দেখাবে অথবা hex code সরাসরি দিতে পারেন:
+- Red: f44336
+- Orange: ff9800
+- Green: 4caf50
+- Blue: 2196f3
+- Purple: 9c27b0
 
-এখন আসল ডিভাইস তৈরি করবেন। **Devices → Devices** যান। **+ Add** ক্লিক করুন।
+এখন আরো কয়েকটা role তৈরি করুন:
 
-একটা বড় ফর্ম আসবে। ধাপে ধাপে পূরণ করুন:
+**Distribution Switch:**
 
 ```
-Name: R-MIR-CORE-01
-Device Type: MikroTik CCR2004-16G-2S+
-Role: Core Router
+Name: Distribution Switch
+Content Types: dcim | device
+Color: ff9800 (Orange)
+Weight: 800
+Description: Distribution layer switches aggregating access switches
+```
+
+**Access Switch:**
+
+```
+Name: Access Switch
+Content Types: dcim | device
+Color: 4caf50 (Green)
+Weight: 600
+Description: Access layer switches connecting to customers
+```
+
+**Firewall:**
+
+```
+Name: Firewall
+Content Types: dcim | device
+Color: 9c27b0 (Purple)
+Weight: 950
+Description: Security devices and firewalls
+```
+
+এখন **Extras → Roles** এ গিয়ে দেখুন - চারটা role দেখাবে কালারফুল badges সহ।
+
+---
+
+### Manufacturers এবং Device Types
+
+ডিভাইস যোগ করার আগে তাদের টাইপ ডিফাইন করতে হবে।
+
+#### Manufacturers যোগ করা
+
+**Devices → Manufacturers** যান। **+ Add** ক্লিক করুন।
+
+**MikroTik:**
+
+```
+Name: MikroTik
+Description: Latvian network equipment manufacturer specializing in routers and wireless systems
+```
+
+**Create** করুন।
+
+একইভাবে আরো:
+
+**TP-Link:**
+
+```
+Name: TP-Link
+Description: Chinese networking equipment manufacturer
+```
+
+**Cisco:**
+
+```
+Name: Cisco
+Description: American multinational technology company - networking equipment
+```
+
+#### Device Types তৈরি করা
+
+এখন ডিভাইস টাইপ বানাবেন। এটা একটু সময় নেয় কারণ interface templates যোগ করতে হয়।
+
+**Devices → Device Types** যান। **+ Add** ক্লিক করুন।
+
+**MikroTik CCR2004:**
+
+```
+Manufacturer: MikroTik (ড্রপডাউন থেকে)
+Model: CCR2004-1G-12S+2XS
+Part Number: CCR2004-1G-12S+2XS
+Height (U): 1
+Is Full Depth: ✓
+Subdevice Role: None
+Description: Cloud Core Router with 1x 1G, 12x 10G SFP+, 2x 25G SFP28 ports
+Comments: Typical use - Core router for small to medium ISPs
+```
+
+**Create** ক্লিক করুন।
+
+এখন ইন্টারফেস টেমপ্লেট যোগ করতে হবে। Device Type এর ডিটেইল পেজে আসবেন।
+
+**Interface Templates** ট্যাবে ক্লিক করুন। **+ Add Interface Templates** বাটনে ক্লিক করুন।
+
+একসাথে একাধিক ইন্টারফেস যোগ করতে পারবেন:
+
+**Management Interface:**
+
+```
+Name: ether1
+Type: 1000BASE-T (1GE)
+Management Only: ✓ (চেক করুন - এটা ম্যানেজমেন্ট পোর্ট)
+```
+
+**Create and Add Another** ক্লিক করুন।
+
+**SFP+ Ports (একটা একটা করে বা pattern ব্যবহার করে):**
+
+Nautobot smart - আপনি pattern ব্যবহার করতে পারেন:
+
+```
+Name: sfp-sfpplus[1-12]
+Type: 10GBASE-X-SFP+
+Management Only: (আনচেক)
+```
+
+এটা করলে sfp-sfpplus1 থেকে sfp-sfpplus12 পর্যন্ত ১২টা ইন্টারফেস একসাথে তৈরি হবে।
+
+**Create and Add Another** ক্লিক করুন।
+
+**SFP28 Ports:**
+
+```
+Name: sfp28-[1-2]
+Type: 25GBASE-X-SFP28
+Management Only: (আনচেক)
+```
+
+এখন **Create** ক্লিক করুন (শেষ যেহেতু)।
+
+Interface Templates ট্যাবে গিয়ে দেখুন - ১৫টা ইন্টারফেস দেখাবে (১ + ১২ + ২)।
+
+চমৎকার! এখন যখনই এই ডিভাইস টাইপের একটা নতুন ডিভাইস তৈরি করবেন, সব ইন্টারফেস অটোমেটিক্যালি কপি হয়ে যাবে।
+
+একইভাবে আরো দুটো ডিভাইস টাইপ তৈরি করুন:
+
+**TP-Link TL-SG3428:**
+
+```
+Manufacturer: TP-Link
+Model: TL-SG3428
+Height (U): 1
+Is Full Depth: ✓
+Description: 28-Port Gigabit L2+ Managed Switch with 4 SFP slots
+
+Interface Templates:
+  - ether[1-24]: Type 1000BASE-T
+  - sfp[1-4]: Type 1000BASE-X-SFP
+```
+
+**TP-Link TL-SG1024D:**
+
+```
+Manufacturer: TP-Link
+Model: TL-SG1024D
+Height (U): 1
+Is Full Depth: ✓
+Description: 24-Port Gigabit Unmanaged Switch
+
+Interface Templates:
+  - ether[1-24]: Type 1000BASE-T
+```
+
+---
+
+### Racks তৈরি করা
+
+এখন র‍্যাক যোগ করব যেখানে ডিভাইস মাউন্ট করা হবে।
+
+**Devices → Racks** যান। **+ Add** ক্লিক করুন।
+
+**Mirpur POP Rack A:**
+
+```
+Name: Rack A
+Location: Mirpur POP (ড্রপডাউন থেকে সিলেক্ট করুন - এটা hierarchy তে দেখাবে)
+Status: Active
+Facility ID: MIR-RACK-A
+Type: 4-post cabinet
+Width: 19 inches
+Height (U): 42
+Outer Width: 600 (mm)
+Outer Depth: 1000 (mm)
+Description: Primary equipment rack in Mirpur POP
+Comments: Rack installed January 2023. APC NetShelter SV 42U.
+```
+
+**Create and Add Another** ক্লিক করুন (যদি আরো র‍্যাক যোগ করতে চান)।
+
+**Mirpur POP Rack B:**
+
+```
+Name: Rack B
 Location: Mirpur POP
-Rack: Rack-A
-Position: 20 (মানে র‍্যাকের ২০U পজিশনে)
+Status: Active
+Facility ID: MIR-RACK-B
+Type: 4-post cabinet
+Width: 19 inches
+Height (U): 42
+Description: Secondary equipment rack in Mirpur POP
+```
+
+**Create** ক্লিক করুন।
+
+একইভাবে Uttara POP এর জন্য:
+
+**Uttara POP Rack A:**
+
+```
+Name: Rack A
+Location: Uttara POP
+Status: Active
+Facility ID: UTT-RACK-A
+Type: 4-post cabinet
+Width: 19 inches
+Height (U): 42
+Description: Primary equipment rack in Uttara POP
+```
+
+এখন **Devices → Racks** লিস্টে গিয়ে দেখুন - তিনটা র‍্যাক দেখাবে।
+
+---
+
+### প্রথম Device এন্ট্রি - মিরপুর কোর রাউটার
+
+এখন সবচেয়ে exciting অংশ - প্রথম ডিভাইস যোগ করা!
+
+**Devices → Devices** যান। **+ Add** ক্লিক করুন।
+
+একটা বড় ফর্ম আসবে। ঘাবড়াবেন না - ধাপে ধাপে পূরণ করব।
+
+```
+Name: R-DN-MIR-CORE-01
+Device Type: MikroTik CCR2004-1G-12S+2XS (টাইপ করলে autocomplete আসবে)
+Role: Core Router
+Location: Mirpur POP (Hierarchy দেখাবে: Dhaka North Zone > Mirpur Cluster > Mirpur POP)
+```
+
+এই চারটা ফিল্ড সবচেয়ে ইম্পর্ট্যান্ট। এগুলো required।
+
+এখন optional কিন্তু recommended ফিল্ডগুলো:
+
+```
+Rack: Rack A
+Position: 25 (মানে র‍্যাকের ২৫U পজিশনে)
+Face: Front
+
+Status: Active
+
+Tenant: (খালি রাখুন - SkyNets একটাই organization)
+Platform: (খালি রাখুন - এটা OS platform এর জন্য, optional)
+
+Serial Number: ABC1234MIR001
+Asset Tag: SKY-RTR-001
+
+Description: Primary core router for Mirpur POP serving approximately 4000 customers
+
+Comments:
+  - Purchased: December 2022
+  - Vendor: TechSource Bangladesh
+  - Purchase Order: PO-2022-12-015
+  - Warranty: 3 years (expires Dec 2025)
+  - Installation Date: January 15, 2023
+```
+
+সব পূরণ হয়ে গেলে **Create** ক্লিক করুন।
+
+আপনার প্রথম ডিভাইস তৈরি হয়ে গেছে!
+
+ডিভাইস ডিটেইল পেজে চলে যাবেন। এখানে দেখবেন:
+
+- **Device Info:** নাম, টাইপ, লোকেশন, status
+- **Rack Position:** একটা visual diagram যেখানে র‍্যাকে ডিভাইসের পজিশন দেখাচ্ছে
+- **Interfaces:** সব ইন্টারফেসের লিস্ট (১৫টা - Device Type থেকে কপি হয়েছে)
+
+**Interfaces** ট্যাবে ক্লিক করুন। দেখবেন:
+
+```
+ether1
+sfp-sfpplus1
+sfp-sfpplus2
+...
+sfp-sfpplus12
+sfp28-1
+sfp28-2
+```
+
+চমৎকার! সব ইন্টারফেস অটোমেটিক্যালি এসেছে।
+
+---
+
+### Interface কনফিগারেশন - Details যোগ করা
+
+এখন ইন্টারফেসগুলোতে কিছু ডিটেইলস যোগ করব।
+
+ether1 ইন্টারফেসে ক্লিক করুন। একটা ডিটেইল পেজ আসবে। **Edit** বাটনে ক্লিক করুন।
+
+```
+Name: ether1 (ইতিমধ্যে আছে)
+Type: 1000BASE-T (ইতিমধ্যে সেট)
+
+Label: MGMT (optional - physical label)
+Enabled: ✓ (চেক করুন - এই পোর্ট চালু আছে)
+
+Speed: 1000000 (1 Gbps - Kbps এ)
+Duplex: Full
+
+MTU: 1500
+
+Mode: Access (না Tagged)
+
+Description: Management interface - connected to management VLAN
+```
+
+**Update** ক্লিক করুন।
+
+একইভাবে uplink interface:
+
+sfp-sfpplus1 এ যান → **Edit** ক্লিক করুন:
+
+```
+Label: UPLINK-BTCL
+Enabled: ✓
+Speed: 10000000 (10 Gbps)
+MTU: 1500
+Description: Primary uplink to BTCL - 5 Gbps circuit
+```
+
+**Update** করুন।
+
+আপনি চাইলে সব ইন্টারফেসে description দিতে পারেন। তবে শুধু যেগুলো ব্যবহার হচ্ছে সেগুলোতে দিলেই চলবে।
+
+---
+
+### আরো Devices যোগ করা - Bulk এর জন্য প্রস্তুতি
+
+এখন আরো কিছু ডিভাইস যোগ করব। Distribution switch এবং access switches।
+
+**Distribution Switch - মিরপুর:**
+
+**Devices → Devices → + Add**
+
+```
+Name: SW-DN-MIR-DIST-01
+Device Type: TP-Link TL-SG3428
+Role: Distribution Switch
+Location: Mirpur POP
+Rack: Rack A
+Position: 20
 Face: Front
 Status: Active
-Tenant: (খালি রাখুন)
-Serial Number: 1234ABCD5678
-Asset Tag: QN-RTR-001
-Comments: Primary core router for Mirpur POP. Handles all customer traffic.
-```
-
-**Create** ক্লিক করুন। আপনার প্রথম ডিভাইস তৈরি হয়ে গেল!
-
-ডিভাইস তৈরি হওয়ার পরে আপনি ডিভাইসের ডিটেইল পেজে চলে যাবেন। এখানে দেখবেন ডিভাইসের সব তথ্য, আর নিচে "Interfaces" সেকশন দেখাবে। কিন্তু এখনও কোনো ইন্টারফেস নেই। চলুন যুক্ত করি।
-
-### স্টেপ ৭: Interfaces যুক্ত করা
-
-ডিভাইস ডিটেইল পেজে **Interfaces** ট্যাবে যান। **+ Add Interfaces** বাটনে ক্লিক করুন।
-
-একসাথে একাধিক ইন্টারফেস যুক্ত করতে পারবেন। উদাহরণ:
-
-```
-Name Pattern: ether[1-16]
-Type: 1000BASE-T (Gigabit Ethernet)
-Enabled: ✓
-```
-
-এটা করলে ether1 থেকে ether16 পর্যন্ত সব ইন্টারফেস একসাথে তৈরি হবে।
-
-আরও দুটো ইন্টারফেস যুক্ত করুন SFP+ পোর্টের জন্য:
-
-```
-Name Pattern: sfpplus[1-2]
-Type: 10GBASE-X-SFP+ (10 Gigabit SFP+)
-Enabled: ✓
-```
-
-**Create** ক্লিক করুন। সব ইন্টারফেস তৈরি হয়ে গেল।
-
-এবার প্রতিটা ইন্টারফেসে ডেসক্রিপশন যুক্ত করতে পারেন। যেমন ether1 ইন্টারফেসে ক্লিক করুন, তারপর **Edit** করুন:
-
-```
-Description: Uplink to BTCL
-```
-
-এভাবে সব ইন্টারফেসে বোঝার মতো ডেসক্রিপশন দিন। যেমন:
-- ether1: Uplink to BTCL
-- ether2: Backup uplink to Summit
-- ether3-16: Distribution links to access switches
-- sfpplus1: Fiber link to Uttara POP
-- sfpplus2: Spare
-
-### স্টেপ ৮: IP Address যুক্ত করা
-
-এবার ইন্টারফেসে আইপি অ্যাড্রেস যুক্ত করবেন। ধরুন ether1-এ আপলিংক আইপি দিতে হবে।
-
-**IPAM → IP Addresses** যান। **+ Add** ক্লিক করুন।
-
-```
-IP Address: 103.9x.xx.1/30
-Status: Active
-Role: (খালি রাখুন বা "Infrastructure" সিলেক্ট করুন)
-Assigned to Interface: R-MIR-CORE-01 → ether1
-DNS Name: r-mir-core-01-uplink.quicknet.bd
-Description: Primary uplink IP
+Serial Number: TPL1234DIST01
+Asset Tag: SKY-SW-001
+Description: Primary distribution switch for Mirpur POP
 ```
 
 **Create** করুন।
 
-একইভাবে ম্যানেজমেন্ট আইপি যুক্ত করুন। আগে একটা Loopback ইন্টারফেস বানান:
+**Access Switches - একটা একটা করে (পরে CSV দেখাব):**
 
-ডিভাইসে ফিরে যান, **Interfaces** ট্যাবে **+ Add Interface** ক্লিক করুন:
-
-```
-Name: lo0
-Type: Virtual
-Enabled: ✓
-Description: Loopback for management
-```
-
-তারপর এই ইন্টারফেসে আইপি যুক্ত করুন:
+প্রথম Access Switch:
 
 ```
-IP Address: 10.10.1.1/32
-Status: Active
-Role: Loopback
-Assigned to Interface: R-MIR-CORE-01 → lo0
-DNS Name: r-mir-core-01.quicknet.bd
-Description: Management IP
-```
-
-### স্টেপ ৯: VLAN তৈরি
-
-এবার কয়েকটা ভিল্যান তৈরি করি। **IPAM → VLANs** যান। **+ Add** ক্লিক করুন।
-
-```
-VLAN ID: 10
-Name: MANAGEMENT
-Status: Active
+Name: SW-DN-MIR-ACC-01
+Device Type: TP-Link TL-SG1024D
+Role: Access Switch
 Location: Mirpur POP
-Description: Management VLAN for network devices
-```
-
-**Create** করুন। একইভাবে আরও কয়েকটা ভিল্যান বানান:
-
-```
-VLAN 20: UPLINK
-VLAN 100: RESIDENTIAL_CUSTOMERS
-VLAN 200: CORPORATE_CLIENTS
-```
-
-### স্টেপ ১০: IP Prefix তৈরি
-
-এবার আইপি প্রিফিক্স তৈরি করি। **IPAM → Prefixes** যান। **+ Add** ক্লিক করুন।
-
-```
-Prefix: 103.9x.xx.0/23
-Type: Container
+Rack: Rack B
+Position: 15
 Status: Active
+Serial Number: TPLACC001
+Asset Tag: SKY-SW-011
+Description: Building A access switch
+```
+
+দ্বিতীয় Access Switch:
+
+```
+Name: SW-DN-MIR-ACC-02
+Device Type: TP-Link TL-SG1024D
+Role: Access Switch
 Location: Mirpur POP
-Description: Assigned public IP block
-```
-
-**Create** করুন। এটা হলো প্যারেন্ট প্রিফিক্স।
-
-এখন এর ভেতরে চাইল্ড প্রিফিক্স বানান:
-
-```
-Prefix: 103.9x.xx.0/24
-Type: Network
+Rack: Rack B
+Position: 14
 Status: Active
-VLAN: VLAN 100 - RESIDENTIAL_CUSTOMERS
-Location: Mirpur POP
-Description: Residential customer IPs
+Serial Number: TPLACC002
+Asset Tag: SKY-SW-012
+Description: Building B access switch
 ```
 
-এভাবে আরও চাইল্ড প্রিফিক্স বানান বিভিন্ন ইউজের জন্য।
+এভাবে একটা একটা করে করা বিরক্তিকর। দশটা access switch থাকলে তো পুরো দিন চলে যাবে!
 
-### বাল্ক ইমপোর্ট (CSV) - দ্রুত ডেটা এন্ট্রি
+---
 
-এতক্ষণ আমরা একটা একটা করে ডেটা এন্ট্রি করলাম। কিন্তু যদি আপনার পঞ্চাশটা ডিভাইস থাকে? তাহলে তো একটা একটা করে করতে গিয়ে পুরো দিন চলে যাবে। এজন্যই Nautobot-এ CSV ইমপোর্ট ফিচার আছে।
+### CSV Bulk Import - দ্রুত ডেটা এন্ট্রি
 
-### CSV ইমপোর্ট করার নিয়ম
+Nautobot এ CSV দিয়ে bulk import করার সুবিধা আছে। চলুন দেখি কীভাবে।
 
-প্রায় সব অবজেক্ট টাইপে CSV ইমপোর্ট সাপোর্ট আছে। যেমন ধরুন আপনি দশটা ডিভাইস একসাথে ইমপোর্ট করতে চান।
+#### CSV Template ডাউনলোড করা
 
-প্রথমে একটা CSV ফাইল তৈরি করুন। Excel বা Google Sheets ইউজ করতে পারেন, তারপর CSV ফরম্যাটে সেভ করুন।
+**Devices → Devices** লিস্ট পেজে যান।
 
-### উদাহরণ: ডিভাইস ইমপোর্ট
+উপরে ডান দিকে **Import** বাটন দেখবেন। ক্লিক করুন।
 
-ধরুন QuickNet-এর মিরপুর পপে পাঁচটা এক্সেস সুইচ আছে। সবগুলো Cisco Catalyst 2960, বিভিন্ন বিল্ডিংয়ে। এগুলো CSV দিয়ে ইমপোর্ট করবেন।
+একটা পেজ আসবে যেখানে CSV ফরম্যাট দেখানো আছে। নিচে **CSV Field Mapping** সেকশনে সব ফিল্ডের লিস্ট আছে।
 
-প্রথমে CSV ফাইল বানান (`devices.csv`):
+#### CSV ফাইল তৈরি করা
+
+Excel বা Google Sheets এ একটা নতুন ফাইল তৈরি করুন।
+
+প্রথম রো তে হেডার:
 
 ```csv
-name,device_type,role,location,rack,position,status,serial,description
-SW-MIR-ACC-01,Cisco Catalyst 2960,Access Switch,Mirpur POP,Rack-A,10,Active,FCW1234A001,Access switch for Building A
-SW-MIR-ACC-02,Cisco Catalyst 2960,Access Switch,Mirpur POP,Rack-A,11,Active,FCW1234A002,Access switch for Building B
-SW-MIR-ACC-03,Cisco Catalyst 2960,Access Switch,Mirpur POP,Rack-A,12,Active,FCW1234A003,Access switch for Building C
-SW-MIR-ACC-04,Cisco Catalyst 2960,Access Switch,Mirpur POP,Rack-A,13,Active,FCW1234A004,Access switch for Building D
-SW-MIR-ACC-05,Cisco Catalyst 2960,Access Switch,Mirpur POP,Rack-A,14,Active,FCW1234A005,Access switch for Building E
+name,device_type,role,location,rack,position,status,serial,asset_tag,description
+```
+
+এখন ডেটা রো:
+
+```csv
+name,device_type,role,location,rack,position,status,serial,asset_tag,description
+SW-DN-MIR-ACC-03,TP-Link TL-SG1024D,Access Switch,Mirpur POP,Rack B,13,Active,TPLACC003,SKY-SW-013,Building C access switch
+SW-DN-MIR-ACC-04,TP-Link TL-SG1024D,Access Switch,Mirpur POP,Rack B,12,Active,TPLACC004,SKY-SW-014,Building D access switch
+SW-DN-MIR-ACC-05,TP-Link TL-SG1024D,Access Switch,Mirpur POP,Rack B,11,Active,TPLACC005,SKY-SW-015,Building E access switch
 ```
 
 **গুরুত্বপূর্ণ নোট:**
 
-- প্রথম লাইন হলো হেডার - কলামের নাম
+- Device Type, Role, Location, Rack এর নাম হুবহু Nautobot এ যেভাবে লেখা আছে সেভাবে লিখতে হবে
+- Status ও exact মিলতে হবে (Active, Planned, Offline ইত্যাদি)
+- Position একটা নাম্বার
+- Serial এবং Asset Tag unique হতে হবে
 
-- device_type, role, location, rack - এগুলো অবশ্যই Nautobot-এ আগে থেকে থাকতে হবে
+ফাইল CSV ফরম্যাটে সেভ করুন (`devices.csv`)।
 
-- status-এর ভ্যালু হতে হবে Nautobot-এ ডিফাইন করা স্ট্যাটাসগুলোর একটা (Active, Planned, Offline ইত্যাদি)
+#### CSV ইমপোর্ট করা
 
-এবার Nautobot-এ ইমপোর্ট করুন। **Devices → Devices** যান। উপরে ডানদিকে **Import** বাটন দেখবেন। ক্লিক করুন।
+**Devices → Devices → Import** যান।
 
-একটা পেজ আসবে যেখানে CSV ফাইল আপলোড করার অপশন আছে। আপনার `devices.csv` ফাইল সিলেক্ট করুন। **Submit** ক্লিক করুন।
+**CSV Data** বক্সে আপনার CSV ফাইলের কন্টেন্ট পেস্ট করুন। অথবা **Browse** বাটনে ক্লিক করে ফাইল আপলোড করুন।
 
-Nautobot ফাইল পার্স করবে আর দেখাবে কী কী ইমপোর্ট হবে। যদি কোনো এরর থাকে, সেটা দেখাবে। যেমন হয়তো "Cisco Catalyst 2960" নামে কোনো ডিভাইস টাইপ নেই। তাহলে আগে সেটা বানাতে হবে।
+**Submit** ক্লিক করুন।
 
-সব ঠিক থাকলে **Confirm Import** ক্লিক করুন। পাঁচটা ডিভাইস একসাথে তৈরি হয়ে যাবে।
+Nautobot CSV parse করবে এবং একটা preview দেখাবে:
 
-### উদাহরণ: IP Address বাল্ক ইমপোর্ট
+```
+Found 3 objects to import:
+  - SW-DN-MIR-ACC-03
+  - SW-DN-MIR-ACC-04
+  - SW-DN-MIR-ACC-05
+```
 
-আরেকটা দরকারি উদাহরণ দেখি। ধরুন আপনার কাছে একশটা স্ট্যাটিক আইপি আছে যেগুলো কর্পোরেট ক্লায়েন্টদের জন্য অ্যালোকেট করা। এগুলো CSV দিয়ে ইমপোর্ট করবেন।
+যদি কোনো এরর থাকে (যেমন Device Type নাম ভুল), তাহলে সেটা লাল করে দেখাবে।
 
-`ip_addresses.csv`:
+সব ঠিক থাকলে **Confirm Import** বাটনে ক্লিক করুন।
 
-```csv
-address,status,description,tenant
-103.9x.xx.10/32,Active,Corporate Client - XYZ Company,
-103.9x.xx.11/32,Active,Corporate Client - ABC Ltd,
-103.9x.xx.12/32,Active,Corporate Client - DEF Corp,
+তিনটা ডিভাইস একসাথে তৈরি হয়ে যাবে!
+
+**Devices → Devices** লিস্টে গিয়ে দেখুন - এখন আপনার মোট ৭টা ডিভাইস আছে:
+- ১টা Router
+- ১টা Distribution Switch
+- ৫টা Access Switch
+
+---
+
+### IP Address Assignment - Logical কানেকশন
+
+এখন ডিভাইসগুলোতে IP address assign করব।
+
+#### প্রথমে IP Namespace তৈরি
+
+**IPAM → Namespaces** যান। **+ Add** ক্লিক করুন।
+
+```
+Name: Global
+Description: Primary IP namespace for SkyNet Bangladesh
+```
+
+**Create** করুন।
+
+#### IP Prefixes তৈরি করা
+
+IP addresses assign করার আগে prefixes তৈরি করতে হবে।
+
+**IPAM → Prefixes** যান। **+ Add** ক্লিক করুন।
+
+**Parent Prefix - Private Management Network:**
+
+```
+Prefix: 10.10.0.0/16
+Type: Container
+Status: Active
+Namespace: Global
+Description: Internal management network for all SkyNet equipment
+```
+
+**Create and Add Another** করুন।
+
+**Child Prefix - Mirpur Management:**
+
+```
+Prefix: 10.10.10.0/24
+Type: Network
+Status: Active
+Namespace: Global
+Parent: 10.10.0.0/16 (ড্রপডাউন থেকে সিলেক্ট করুন)
+Location: Mirpur POP
+Description: Management IPs for Mirpur POP devices
+```
+
+**Create** করুন।
+
+#### IP Addresses তৈরি এবং Interface এ Assign করা
+
+**IPAM → IP Addresses** যান। **+ Add** ক্লিক করুন।
+
+**Core Router Loopback:**
+
+```
+IP Address: 10.10.1.1/32
+Type: Host
+Status: Active
+Role: Loopback (ড্রপডাউন থেকে)
+Namespace: Global
+Parent Prefix: (খালি রাখুন - auto-detect হবে)
+
+Assigned Object Type: dcim > interface
+Assigned Object: 
+  - Device: R-DN-MIR-CORE-01
+  - Interface: ether1 (ড্রপডাউনে দেখাবে)
+
+DNS Name: r-mir-core-01.skynet.bd
+Description: Management loopback for Mirpur core router
+```
+
+**Create** করুন।
+
+লক্ষ্য করুন - Assigned Object টা একটু tricky। প্রথমে Type সিলেক্ট করতে হবে `dcim > interface`, তারপর দুটো ড্রপডাউন আসবে - Device এবং Interface।
+
+**Distribution Switch Management IP:**
+
+```
+IP Address: 10.10.10.11/24
+Type: Host
+Status: Active
+Namespace: Global
+
+Assigned Object Type: dcim > interface
+Assigned Object:
+  - Device: SW-DN-MIR-DIST-01
+  - Interface: (এখানে একটু সমস্যা - TP-Link switch এ VLAN interface নেই)
+```
+
+একটু দাঁড়ান - TP-Link TL-SG3428 এ management VLAN interface যোগ করা হয়নি। চলুন যোগ করি।
+
+**Devices → Devices → SW-DN-MIR-DIST-01** এ যান।
+
+**Interfaces** ট্যাবে → **+ Add Interfaces** ক্লিক করুন।
+
+```
+Name: vlan10
+Type: Virtual
+Enabled: ✓
+Description: Management VLAN interface
+```
+
+**Create** করুন।
+
+এখন আবার IP address assignment এ ফিরে যান:
+
+```
+IP Address: 10.10.10.11/24
+Assigned Object:
+  - Device: SW-DN-MIR-DIST-01
+  - Interface: vlan10
+
+DNS Name: sw-mir-dist-01.skynet.bd
+```
+
+**Create** করুন।
+
+একইভাবে access switches এ:
+
+```
+10.10.10.21/24 → SW-DN-MIR-ACC-01 (vlan10 interface তৈরি করে)
+10.10.10.22/24 → SW-DN-MIR-ACC-02
+10.10.10.23/24 → SW-DN-MIR-ACC-03
 ...
 ```
 
-একইভাবে **IPAM → IP Addresses** যান, **Import** ক্লিক করুন, ফাইল আপলোড করুন।
+এগুলো CSV দিয়েও করা যায়, কিন্তু Interface assignment একটু tricky CSV এ।
 
-### CSV টেমপ্লেট ডাউনলোড
+#### VLAN Management - Layer 2 সেগমেন্টেশন
 
-আপনি যদি নিশ্চিত না হন CSV-এ ঠিক কোন কোন কলাম লাগবে, তাহলে Nautobot থেকে টেমপ্লেট ডাউনলোড করতে পারেন।
+SkyNets Bangladesh এর নেটওয়ার্কে বিভিন্ন ধরনের ট্রাফিক আছে - ম্যানেজমেন্ট, কাস্টমার, আপলিংক। এগুলো আলাদা করার জন্য VLAN ব্যবহার করা হয়।
 
-যেকোনো অবজেক্ট লিস্ট পেজে (যেমন Devices) গেলে উপরে **Export** বাটন দেখবেন। সেখানে ক্লিক করলে **Export Template** অপশন পাবেন। এটা ডাউনলোড করলে একটা খালি CSV পাবেন সব কলাম সহ। সেটা ফিল আপ করে ইমপোর্ট করতে পারবেন।
+##### VLAN Groups তৈরি করা (অপশনাল কিন্তু recommended)
 
-## ডেটা ভ্যালিডেশন - ভুল ধরা
+VLAN Groups দিয়ে VLANs organize করা যায়। বিশেষ করে যখন একই VLAN ID বিভিন্ন সাইটে ভিন্ন purpose এ ব্যবহার হয়।
 
-Nautobot অনেক ধরনের ভ্যালিডেশন করে যাতে ভুল ডেটা ঢুকতে না পারে। কিন্তু সব ভুল সে ধরতে পারে না। কিছু জিনিস আপনাকেই চেক করতে হবে।
-
-### নেমিং কনভেনশন মেনে চলা
-
-সবচেয়ে গুরুত্বপূর্ণ হলো একটা সুসংগত নেমিং কনভেনশন ফলো করা। QuickNet-এর জন্য একটা কনভেনশন ডিফাইন করি:
-
-**ডিভাইস নেমিং:**
-```
-Format: [Type]-[Location]-[Function]-[Number]
-
-উদাহরণ:
-R-MIR-CORE-01 = Router, Mirpur, Core, Number 01
-SW-MIR-ACC-05 = Switch, Mirpur, Access, Number 05
-OLT-UTT-MAIN-01 = OLT, Uttara, Main, Number 01
-```
-
-**ইন্টারফেস ডেসক্রিপশন:**
-```
-Format: [Purpose] - [Remote Device/Details]
-
-উদাহরণ:
-"Uplink to BTCL"
-"Link to SW-MIR-ACC-01 ether1"
-"Customer: ABC Company"
-```
-
-**VLAN নেমিং:**
-```
-Format: [Purpose]_[Location/Type]
-
-উদাহরণ:
-MGMT_MIRPUR
-RES_CUSTOMERS_MIRPUR
-CORP_CLIENTS
-```
-
-### আইপি অ্যাড্রেস চেক করা
-
-আইপি ইমপোর্ট করার সময় কয়েকটা জিনিস চেক করুন:
-
-**১. সাবনেট মাস্ক ঠিক আছে কিনা:** ধরুন একটা আইপি দিলেন `103.9x.xx.10/24`। কিন্তু আসলে এটা একটা হোস্ট আইপি, তাহলে `/32` হওয়া উচিত। এই ভুল Nautobot ধরবে না, কিন্তু পরে সমস্যা করবে।
-
-**২. আইপি রেঞ্জের ভেতরে আছে কিনা:** যদি আপনার প্রিফিক্স হয় `103.9x.xx.0/24`, তাহলে আইপি হতে হবে `103.9x.xx.1` থেকে `103.9x.xx.254` এর মধ্যে। যদি ভুল করে `103.9x.x1.10` দেন, সেটা আলাদা রেঞ্জে চলে যাবে।
-
-**৩. ডুপ্লিকেট আইপি নেই তো:** Nautobot ডুপ্লিকেট ধরে ফেলবে, কিন্তু CSV ফাইলে আগে থেকে চেক করা ভালো।
-
-### রিলেশনশিপ চেক করা
-
-ধরুন আপনি একটা আইপি একটা ইন্টারফেসে অ্যাসাইন করলেন। কিন্তু সেই ইন্টারফেস আর সেই আইপির সাবনেট দুটো আলাদা ভিল্যানে। এটা লজিক্যালি ভুল, কিন্তু Nautobot এটা ব্লক করবে না। আপনাকেই খেয়াল রাখতে হবে।
-
-### স্ট্যাটাস সঠিকভাবে সেট করা
-
-প্রতিটা অবজেক্টের একটা স্ট্যাটাস থাকে। এটা সঠিকভাবে সেট করা জরুরি:
-
-- **Active:** যেগুলো এখন ইউজ হচ্ছে
-- **Planned:** যেগুলো প্ল্যান করা হয়েছে কিন্তু এখনও ইনস্টল হয়নি
-- **Offline:** যেগুলো আছে কিন্তু চালু নেই
-- **Decommissioned:** যেগুলো আর ইউজ হয় না
-
-স্ট্যাটাস ভুল হলে রিপোর্টিং এ সমস্যা হয়। যেমন আপনি "অ্যাক্টিভ ডিভাইস কয়টা" রিপোর্ট বের করলেন, কিন্তু দেখলেন অফলাইন ডিভাইসও কাউন্ট হয়ে গেছে কারণ স্ট্যাটাস আপডেট করা হয়নি।
-
-## কমন মিসটেক এবং কীভাবে এড়াবেন
-
-আমি অনেক আইএসপিকে Nautobot ইমপ্লিমেন্ট করতে আলাপ করছি। আলাপেই দেখছি, প্রায় সবাই কিছু কমন ভুল করে। চলুন সেগুলো দেখি যাতে আপনি এড়াতে পারেন।
-
-### মিসটেক ১: শুরুতেই সব ডেটা ঢোকাতে চাওয়া
-
-অনেকেই মনে করেন, "আমি একবারেই পুরো নেটওয়ার্ক Nautobot-এ ঢুকিয়ে দেব।" এটা ভুল অ্যাপ্রোচ। পুরো নেটওয়ার্ক একসাথে করতে গেলে ওভারহোয়েলমড হয়ে যাবেন, আর মাঝপথে ছেড়ে দেবেন।
-
-**সমাধান:** ছোট থেকে শুরু করুন। একটা পপ দিয়ে শুরু করুন। সেখানে পাঁচ-দশটা ডিভাইস ঢুকান। তারপর একটু একটু করে বাড়ান। মাসখানেকের মধ্যে পুরো নেটওয়ার্ক কমপ্লিট হয়ে যাবে।
-
-### মিসটেক ২: নেমিং কনভেনশন না মানা
-
-প্রথম দিকে মানুষ র‍্যান্ডমভাবে নাম দেয়। একটা ডিভাইসের নাম দেয় "Router1", আরেকটার "MikroTik-Mirpur", আরেকটার "Core_Router_Main"। এরকম এলোমেলো নেমিং পরে বিশাল সমস্যা তৈরি করে। সার্চ করতে পারবেন না, ফিল্টার করতে পারবেন না, রিপোর্ট বের করতে পারবেন না।
-
-**সমাধান:** একদম শুরুতেই একটা নেমিং কনভেনশন ঠিক করুন। সেটা লিখে রাখুন। টিমের সবাইকে জানান। আর সেটা কঠোরভাবে মেনে চলুন। পরে চেঞ্জ করা অনেক কঠিন।
-
-QuickNet-এর জন্য একটা সিম্পল নেমিং ডকুমেন্ট বানান:
+**IPAM → VLAN Groups** যান। **+ Add** ক্লিক করুন।
 
 ```
-=== QuickNet Naming Convention ===
-
-Devices:
-- Format: [TYPE]-[SITE]-[ROLE]-[NUM]
-- TYPE: R (Router), SW (Switch), OLT, FW (Firewall)
-- SITE: MIR (Mirpur), UTT (Uttara)
-- ROLE: CORE, DIST (Distribution), ACC (Access)
-- NUM: 01, 02, 03... (zero-padded)
-- Example: R-MIR-CORE-01, SW-UTT-ACC-15
-
-VLANs:
-- Keep it descriptive
-- Use underscore for spaces
-- Example: RESIDENTIAL_CUSTOMERS, CORPORATE_CLIENTS
-
-IP Prefixes:
-- Add clear description
-- Mention purpose and location
-- Example: "Residential customers - Mirpur area"
+Name: Mirpur POP VLANs
+Location: Mirpur POP
+Description: VLAN assignments for Mirpur Point of Presence
 ```
 
-### মিসটেক ৩: রিলেশনশিপ ভুল করা
+**Create** করুন।
 
-অনেক সময় দেখা যায়, একটা আইপি একটা ইন্টারফেসে অ্যাসাইন করা হয়েছে, কিন্তু সেই ইন্টারফেসটা কোন ডিভাইসের সেটা ভুলে সেট করা। অথবা একটা ক্যাবল দুটো ইন্টারফেস কানেক্ট করে, কিন্তু একটা ইন্টারফেস ভুল ডিভাইসে সেট করা।
+একইভাবে Uttara POP এর জন্য:
 
-**সমাধান:** ডেটা এন্ট্রি করার সময় ধাপে ধাপে করুন। প্রথমে লোকেশন, তারপর ডিভাইস, তারপর ইন্টারফেস, তারপর আইপি। এই সিকোয়েন্স মেনে চললে রিলেশনশিপ ভুল হওয়ার সম্ভাবনা কমে।
-
-আর ডেটা এন্ট্রি শেষ হলে একবার ভ্যালিডেশন করুন। Nautobot-এর রিপোর্ট ফিচার ইউজ করে চেক করতে পারেন কোনো অরফ্যান অবজেক্ট আছে কিনা।
-
-### মিসটেক ৪: পুরোনো ডেটা মুছে না ফেলা
-
-একটা ডিভাইস রিপ্লেস করলেন, কিন্তু পুরোনো ডিভাইসের এন্ট্রি Nautobot-এ থেকে গেল। এরকম হতে থাকলে Nautobot পুরোনো ডেটায় ভরে যাবে। তখন কোনটা এখনকার, কোনটা আগের - কিছু বোঝা যাবে না।
-
-**সমাধান:** যখনই কোনো চেঞ্জ করবেন নেটওয়ার্কে, সাথে সাথে Nautobot আপডেট করুন। ডিভাইস রিমুভ করলেন? Nautobot থেকে ডিলিট করুন অথবা স্ট্যাটাস "Decommissioned" করুন। আইপি ফ্রি করলেন? সেটাও আপডেট করুন।
-
-একটা প্র‍্যাকটিস হলো, মাসে একবার একটা "ক্লিনআপ ডে" রাখুন। সেদিন পুরো Nautobot চেক করবেন, পুরোনো এন্ট্রি মুছবেন, ডুপ্লিকেট দেখবেন, স্ট্যাটাস আপডেট করবেন।
-
-### মিসটেক ৫: ডেসক্রিপশন ফিল্ড খালি রাখা
-
-অনেকেই Description ফিল্ড খালি রেখে দেয়। "নাম তো দিয়েছি, এটা আর কী লাগবে?" কিন্তু ছয় মাস পরে যখন আপনি বা আপনার কলিগ সেই এন্ট্রি দেখবে, তখন শুধু নাম দেখে বুঝবে না এটা কী কাজে লাগে।
-
-**সমাধান:** প্রতিটা গুরুত্বপূর্ণ অবজেক্টে একটা পরিষ্কার ডেসক্রিপশন দিন। ডিভাইসে লিখুন কী কাজে লাগে, কোন এরিয়া সার্ভ করে। ইন্টারফেসে লিখুন কোথায় কানেক্টেড। আইপিতে লিখুন কার জন্য।
-
-উদাহরণ:
-
-**খারাপ:**
 ```
-Device: SW-MIR-ACC-10
+Name: Uttara POP VLANs
+Location: Uttara POP
+Description: VLAN assignments for Uttara Point of Presence
+```
+
+#### VLANs তৈরি করা
+
+এখন actual VLANs তৈরি করব।
+
+**IPAM → VLANs** যান। **+ Add** ক্লিক করুন।
+
+**VLAN 10 - Management (Mirpur):**
+
+```
+VLAN ID: 10
+Name: MGMT_MIRPUR
+Status: Active
+Group: Mirpur POP VLANs (ড্রপডাউন থেকে)
+Location: Mirpur POP
+Tenant: (খালি)
+Description: Management VLAN for network devices in Mirpur POP
+```
+
+**Create and Add Another** করুন।
+
+**VLAN 20 - Uplink (Mirpur):**
+
+```
+VLAN ID: 20
+Name: UPLINK_MIRPUR
+Status: Active
+Group: Mirpur POP VLANs
+Location: Mirpur POP
+Description: Uplink traffic to BTCL from Mirpur
+```
+
+**Create and Add Another** করুন।
+
+**VLAN 100 - Residential (Mirpur):**
+
+```
+VLAN ID: 100
+Name: RESIDENTIAL_MIR
+Status: Active
+Group: Mirpur POP VLANs
+Location: Mirpur POP
+Description: Residential customer traffic - Mirpur area
+```
+
+**Create** করুন।
+
+একইভাবে Uttara POP এর জন্য VLANs তৈরি করুন:
+
+```
+VLAN 10: MGMT_UTTARA (Group: Uttara POP VLANs, Location: Uttara POP)
+VLAN 21: UPLINK_UTTARA (Group: Uttara POP VLANs)
+VLAN 101: RESIDENTIAL_UTT (Group: Uttara POP VLANs)
+```
+
+**Site-Agnostic VLAN (সব সাইটে একই):**
+
+কিছু VLAN সব সাইটে একই purpose এ ব্যবহার হয়:
+
+```
+VLAN ID: 200
+Name: CORPORATE
+Status: Active
+Group: (খালি - কোনো specific group এ নেই)
+Location: (খালি - সব সাইটে ব্যবহার হয়)
+Description: Corporate client connections across all POPs
+```
+
+এখন **IPAM → VLANs** লিস্টে গিয়ে দেখুন - আপনার সব VLANs দেখাবে VLAN ID, Name, Location সহ।
+
+#### VLAN এবং Prefix এর সম্পর্ক
+
+এখন VLANs এর সাথে IP Prefixes link করব।
+
+**IPAM → Prefixes** এ যান। আগে তৈরি করা 10.10.10.0/24 prefix খুঁজুন। ক্লিক করে ডিটেইল পেজে যান।
+
+**Edit** বাটনে ক্লিক করুন।
+
+```
+Prefix: 10.10.10.0/24
+...
+(সব ফিল্ড আগের মতো)
+
+VLAN: MGMT_MIRPUR (এটা নতুন যোগ করুন - ড্রপডাউন থেকে সিলেক্ট)
+```
+
+**Update** করুন।
+
+এখন Nautobot জানে 10.10.10.0/24 prefix টা VLAN 10 (MGMT_MIRPUR) এ ব্যবহার হয়।
+
+---
+
+### Cable Management - Physical Connections
+
+এখন ডিভাইসগুলোর মধ্যে physical cable connections ডকুমেন্ট করব।
+
+#### Cable তৈরি করা - Method 1 (Interface থেকে)
+
+সবচেয়ে সহজ পদ্ধতি হলো একটা interface থেকে সরাসরি cable connect করা।
+
+**Devices → Devices → R-DN-MIR-CORE-01** এ যান।
+
+**Interfaces** ট্যাবে ক্লিক করুন।
+
+**sfp-sfpplus2** interface খুঁজুন (এটা distribution switch এ যাবে)। ক্লিক করুন।
+
+Interface ডিটেইল পেজে **Connect Cable** বাটন দেখবেন। ক্লিক করুন।
+
+একটা ফর্ম আসবে:
+
+```
+Termination A (already filled):
+  - Device: R-DN-MIR-CORE-01
+  - Interface: sfp-sfpplus2
+
+Termination B:
+  - Termination Type: Interface (default selected)
+  - Device: SW-DN-MIR-DIST-01 (ড্রপডাউন থেকে সিলেক্ট করুন)
+  - Name: sfp1 (এই switch এর SFP port)
+
+Cable:
+  - Type: Single-Mode Fiber (SMF) (ড্রপডাউন থেকে)
+  - Status: Connected
+  - Color: 0000ff (Blue - হেক্স কোড)
+  - Length: 5
+  - Length Unit: Meters
+  - Label: CORE-TO-DIST-01
+
+Description: Core router to distribution switch - 10G fiber link
+```
+
+**Create** ক্লিক করুন।
+
+Cable তৈরি হয়ে গেছে! এখন R-DN-MIR-CORE-01 এর sfp-sfpplus2 interface এ গেলে দেখবেন "Cable: CORE-TO-DIST-01" লেখা আছে। ক্লিক করলে cable details দেখাবে।
+
+#### Cable তৈরি করা - Method 2 (সরাসরি Cable object)
+
+আরেকটা পদ্ধতি হলো সরাসরি Cable object তৈরি করা।
+
+**Devices → Cables** যান। **+ Add** ক্লিক করুন।
+
+```
+Termination A:
+  - Termination Type: dcim > interface
+  - Device: SW-DN-MIR-DIST-01
+  - Name: ether1
+
+Termination B:
+  - Termination Type: dcim > interface
+  - Device: SW-DN-MIR-ACC-01
+  - Name: ether24
+
+Cable:
+  - Type: Cat6 (Category 6 Ethernet)
+  - Status: Connected
+  - Color: ffeb3b (Yellow)
+  - Length: 20
+  - Length Unit: Meters
+  - Label: DIST-TO-ACC-01
+
+Description: Distribution to access switch - Building A
+```
+
+**Create** করুন।
+
+একইভাবে আরো কয়েকটা cable তৈরি করুন:
+
+**Distribution to Access Switch 02:**
+
+```
+SW-DN-MIR-DIST-01 (ether2) ↔ SW-DN-MIR-ACC-02 (ether24)
+Type: Cat6, Color: Yellow, Length: 22m
+Label: DIST-TO-ACC-02
+```
+
+**Distribution to Access Switch 03:**
+
+```
+SW-DN-MIR-DIST-01 (ether3) ↔ SW-DN-MIR-ACC-03 (ether24)
+Type: Cat6, Color: Yellow, Length: 25m
+Label: DIST-TO-ACC-03
+```
+
+#### Cable Types - কোনগুলো available?
+
+Nautobot এ built-in cable types আছে:
+
+**Copper:**
+- Cat3, Cat5, Cat5e, Cat6, Cat6a, Cat7, Cat8
+- Coaxial
+- Direct Attach Copper (DAC)
+
+**Fiber:**
+- Multi-Mode Fiber (MMF)
+- Single-Mode Fiber (SMF)
+- Active Optical Cabling (AOC)
+
+**Power:**
+- AC Power
+- DC Power
+
+আপনার যেটা দরকার সেটা সিলেক্ট করুন।
+
+#### Cable Trace ব্যবহার করা
+
+এখন একটা powerful ফিচার দেখি - Cable Trace।
+
+**Devices → Devices → SW-DN-MIR-ACC-01** এ যান।
+
+**Interfaces** ট্যাবে → **ether24** interface ক্লিক করুন।
+
+Interface পেজে **Trace** বাটন দেখবেন। ক্লিক করুন।
+
+একটা visual diagram দেখাবে:
+
+```
+SW-DN-MIR-ACC-01 (ether24)
+    |
+    | Cable: DIST-TO-ACC-01 (Cat6, 20m, Yellow)
+    ↓
+SW-DN-MIR-DIST-01 (ether1)
+    |
+    | Cable: CORE-TO-DIST-01 (SMF, 5m, Blue)
+    ↓
+R-DN-MIR-CORE-01 (sfp-sfpplus2)
+```
+
+এভাবে পুরো physical path দেখতে পাবেন। এটা troubleshooting এর সময় অসাধারণ কাজে লাগে।
+
+---
+
+### Provider এবং Circuit সেটআপ
+
+SkyNets Bangladesh এর upstream connectivity BTCL থেকে। চলুন এটা ডকুমেন্ট করি।
+
+#### Provider তৈরি করা
+
+**Circuits → Providers** যান। **+ Add** ক্লিক করুন।
+
+```
+Name: BTCL
+ASN: 17494
+Account Number: SKYN-BTCL-2023-MIR
+Portal URL: https://isp.btcl.gov.bd
+NOC Contact: +880 2-9555555
+Admin Contact: noc@btcl.gov.bd
+
+Description: Bangladesh Telecommunications Company Limited - Primary upstream provider
+
+Comments:
+  - Account Manager: Mr. Kamal Hossain
+  - Sales Contact: +880 2-9555556
+  - Technical Support: support@btcl.gov.bd
+  - 24/7 NOC: +880 1700-000000
+```
+
+**Create** করুন।
+
+#### Circuit Type তৈরি করা
+
+**Circuits → Circuit Types** যান। **+ Add** ক্লিক করুন।
+
+```
+Name: Fiber Optic
+Description: Fiber optic connectivity - single-mode or multi-mode
+```
+
+**Create** করুন।
+
+#### Circuit তৈরি করা
+
+**Circuits → Circuits** যান। **+ Add** ক্লিক করুন।
+
+```
+Circuit ID: BTCL-MIR-001
+Provider: BTCL (ড্রপডাউন থেকে)
+Type: Fiber Optic
+Status: Active
+
+Install Date: 2023-03-15
+Termination Date: (খালি - চলমান)
+Commit Rate: 5000 (Mbps - ৫ Gbps)
+
+Description: Primary 5Gbps internet uplink from Mirpur POP
+
+Comments:
+  - Contract Start: 2023-03-01
+  - Contract Duration: 2 years
+  - Monthly Cost: BDT 400,000
+  - Contract Renewal Date: 2025-03-01
+  - Bandwidth Burstable: Up to 6 Gbps
+  - SLA: 99.5% uptime guarantee
+```
+
+**Create** করুন।
+
+এখন Circuit Terminations যোগ করতে হবে।
+
+Circuit ডিটেইল পেজে **Terminations** ট্যাবে যান। **+ Add Termination** ক্লিক করুন।
+
+**Termination A (Provider Side):**
+
+```
+Circuit: BTCL-MIR-001 (already selected)
+Term Side: A
+Location: (খালি - provider সাইড)
+Provider Network: (খালি)
+Port Speed: 5000 (Mbps)
+Upstream Speed: 5000 (Mbps)
+Cross Connect ID: BTCL-XC-MIR-12345
+Patch Panel/Port: PP-BTCL-MIR-001
+Description: BTCL side termination at their Mirpur exchange
+```
+
+**Create and Add Another** করুন।
+
+**Termination Z (SkyNets Bangladesh Side):**
+
+```
+Circuit: BTCL-MIR-001
+Term Side: Z
+Location: Mirpur POP (ড্রপডাউন থেকে)
+Device: R-DN-MIR-CORE-01
+Interface: sfp-sfpplus1
+Port Speed: 5000 (Mbps)
+Description: Connected to core router uplink port
+```
+
+**Create** করুন।
+
+এখন Circuit এবং Device পুরোপুরি linked। Circuit ডিটেইল পেজে দেখবেন Termination Z এ device এবং interface এর লিংক আছে। ক্লিক করলে সরাসরি সেই interface এ যাবেন।
+
+একইভাবে উত্তরা পপের জন্য Summit Communications এর circuit তৈরি করুন (যদি থাকে)।
+
+---
+
+### Data Validation এবং Quality Check
+
+এতক্ষণ অনেক ডেটা এন্ট্রি করলাম। এখন চেক করা দরকার সব ঠিক আছে কিনা।
+
+#### Device List Review
+
+**Devices → Devices** যান।
+
+উপরে ডান দিকে **Filters** প্যানেল দেখবেন। এখান থেকে filter করতে পারবেন:
+
+**Location দিয়ে filter:**
+- Location: Mirpur POP সিলেক্ট করুন
+- শুধু মিরপুর পপের ডিভাইস দেখাবে
+
+**Role দিয়ে filter:**
+- Role: Core Router সিলেক্ট করুন
+- শুধু core routers দেখাবে
+
+**Status দিয়ে filter:**
+- Status: Active সিলেক্ট করুন
+- শুধু active ডিভাইস দেখাবে
+
+#### Missing Information চেক করা
+
+কিছু common issues খুঁজুন:
+
+**Devices without Serial Numbers:**
+
+Filters প্যানেলে:
+- Has Serial Number: No সিলেক্ট করুন
+
+যদি কোনো device আসে, তাহলে সেগুলোতে serial number যোগ করুন।
+
+**Devices without Location:**
+
+Filters:
+- Location: (empty) - অর্থাৎ কোনো location নেই
+
+এরকম device থাকা উচিত না। থাকলে সংশোধন করুন।
+
+#### IP Address Utilization দেখা
+
+**IPAM → Prefixes** যান।
+
+10.10.10.0/24 prefix ক্লিক করুন।
+
+ডিটেইল পেজে দেখবেন:
+
+```
+Utilization: 23% (6 of 256 IPs used)
+```
+
+একটা ভিজুয়াল বার দেখাবে কতটুকু ব্যবহৃত। যদি 80% এর উপরে যায়, তাহলে নতুন prefix প্ল্যান করুন।
+
+**IP Addresses** ট্যাবে ক্লিক করলে এই prefix এর সব IPs দেখাবে:
+
+```
+10.10.10.11/24 - SW-DN-MIR-DIST-01 (Active)
+10.10.10.21/24 - SW-DN-MIR-ACC-01 (Active)
+10.10.10.22/24 - SW-DN-MIR-ACC-02 (Active)
+...
+```
+
+#### Duplicate Name চেক
+
+Nautobot automatically duplicate names prevent করে, কিন্তু double-check করা ভালো।
+
+**Devices → Devices** লিস্টে name column এ sort করুন (column header এ ক্লিক করুন)। দেখুন কোনো duplicate আছে কিনা।
+
+---
+
+### Common Mistakes এবং কীভাবে এড়াবেন
+
+SkyNets Bangladesh এর NOC টিম প্রথমে কিছু ভুল করেছিল। চলুন সেগুলো দেখি যাতে আপনি এড়াতে পারেন।
+
+#### Mistake 1: Location Hierarchy ভুল
+
+**ভুল করা হয়েছিল:**
+
+Mirpur POP তৈরি করার সময় Parent Location দেওয়া হয়নি। ফলে এটা top-level এ চলে গিয়েছিল।
+
+```
+(ভুল hierarchy)
+Dhaka North Zone
+Mirpur Cluster
+Mirpur POP (parent নেই - top level এ!)
+```
+
+**সমাধান:**
+
+Mirpur POP edit করে Parent Location = Mirpur Cluster সেট করতে হয়েছে।
+
+**শিক্ষা:** Location তৈরি করার সময় সবসময় Parent Location চেক করুন।
+
+#### Mistake 2: Device Type এ Interface Templates ভুলে যাওয়া
+
+**ভুল:**
+
+TP-Link TL-SG1024D device type তৈরি করা হয়েছিল কিন্তু interface templates যোগ করা হয়নি। ফলে device তৈরি করার পরে manually ২৪টা interface যোগ করতে হয়েছে প্রতিটা device এ!
+
+**সমাধান:**
+
+Device Type এ একবার interface templates ঠিকমতো যোগ করার পরে সব ঠিক হয়েছে।
+
+**শিক্ষা:** Device Type তৈরি করার সময় অবশ্যই Interface Templates যোগ করুন। একটু সময় লাগবে, কিন্তু পরে অনেক সময় বাঁচবে।
+
+#### Mistake 3: IP Address এ Prefix Mask ভুল
+
+**ভুল:**
+
+Management IP দেওয়া হয়েছিল 10.10.10.11/32 (একটা host IP হিসেবে)। কিন্তু আসলে এটা একটা network এর part, তাই হওয়া উচিত ছিল 10.10.10.11/24।
+
+**সমস্যা:**
+
+/32 দিলে ওই IP শুধু নিজের সাথে communicate করতে পারে, network এর অন্য কারো সাথে না!
+
+**সমাধান:**
+
+সব IP addresses review করে সঠিক subnet mask দিতে হয়েছে।
+
+**শিক্ষা:** 
+- Host IPs (loopbacks, point-to-point links): /32 বা /30, /31
+- Network IPs (management, LANs): /24, /25, /26 ইত্যাদি
+
+#### Mistake 4: Cable Color Coding না মানা
+
+**ভুল:**
+
+প্রথমে সব cable এ random color দেওয়া হয়েছিল। ফলে physical rack এ গিয়ে কোন cable কী বোঝা যাচ্ছিল না।
+
+**সমাধান:**
+
+একটা color coding scheme বানানো হয়েছে:
+- Blue: Fiber cables
+- Yellow: Cat6 ethernet (access to distribution)
+- Green: Cat6 ethernet (customer connections)
+- Red: Critical uplink/backbone
+
+Nautobot এ সব cable update করা হয়েছে এই color scheme অনুযায়ী।
+
+**শিক্ষা:** একটা consistent naming এবং color scheme follow করুন।
+
+#### Mistake 5: Description ফিল্ড খালি রাখা
+
+**ভুল:**
+
+প্রথম দিকে শুধু device name দেওয়া হয়েছিল, description খালি ছিল।
+
+```
+Name: SW-DN-MIR-ACC-03
 Description: (empty)
 ```
 
-**ভালো:**
+ছয় মাস পরে যখন দেখা গেল, কেউ বুঝতে পারছিল না এই switch কোন building এ, কী purpose এ।
+
+**সমাধান:**
+
+সব device এ proper description যোগ করা হয়েছে:
+
 ```
-Device: SW-MIR-ACC-10
-Description: Access switch for Building-A, Sector-12, Mirpur. Serves approximately 150 residential customers on VLAN 100.
+Name: SW-DN-MIR-ACC-03
+Description: Building C access switch serving 280 residential customers in Mirpur Sector 12
 ```
 
-### মিসটেক ৬: CSV-তে হোয়াইটস্পেস সমস্যা
+**শিক্ষা:** Description এবং Comments ফিল্ড সবসময় পূরণ করুন। ভবিষ্যতে নিজেই নিজেকে ধন্যবাদ দেবেন।
 
-CSV ইমপোর্ট করার সময় একটা কমন সমস্যা হলো হোয়াইটস্পেস। ধরুন আপনার CSV-তে লেখা আছে `Mirpur POP ` (শেষে একটা স্পেস)। কিন্তু Nautobot-এ সাইটের নাম হলো `Mirpur POP` (স্পেস ছাড়া)। CSV ইমপোর্ট ফেইল করবে কারণ ম্যাচ করবে না।
+#### Mistake 6: Status সঠিকভাবে সেট না করা
 
-**সমাধান:** CSV ফাইল তৈরি করার পরে একবার চেক করুন সব ডেটায় এক্সট্রা স্পেস নেই তো। Excel-এ TRIM() ফাংশন ইউজ করতে পারেন সব সেলে স্পেস রিমুভ করতে।
+**ভুল:**
 
-### মিসটেক ৭: Required ফিল্ড মিস করা
+একটা old switch যেটা আর ব্যবহার হয় না, সেটার status ছিল "Active"।
 
-কিছু ফিল্ড রিকোয়ার্ড, মানে সেগুলো খালি রাখা যায় না। CSV ইমপোর্টে যদি রিকোয়ার্ড ফিল্ড মিস হয়, পুরো ইমপোর্ট ফেইল করবে।
+**সমস্যা:**
 
-**সমাধান:** ইমপোর্ট করার আগে Nautobot-এর UI থেকে একটা টেস্ট এন্ট্রি করে দেখুন কোন কোন ফিল্ড রিকোয়ার্ড। সেগুলো অবশ্যই CSV-তে রাখুন।
+Reports এ এটা count হচ্ছিল। ফলে actual active devices count ভুল আসছিল।
 
-সাধারণত এই ফিল্ডগুলো রিকোয়ার্ড:
-- name (সব জায়গায়)
-- device_type (ডিভাইসে)
-- location (ডিভাইসে)
-- status (সব জায়গায়)
+**সমাধান:**
 
-### মিসটেক ৮: একসাথে অনেক কিছু ইমপোর্ট করা
+Device status "Decommissioned" করা হয়েছে। অথবা একদম delete করে দেওয়া হয়েছে।
 
-অনেকে হাজার লাইনের CSV ফাইল ইমপোর্ট করতে যায়। যদি কোথাও একটা এরর থাকে, পুরো ইমপোর্ট ফেইল করে। তখন খুঁজে বের করা কঠিন হয় কোথায় সমস্যা।
+**শিক্ষা:** Device lifecycle maintain করুন - Active, Offline, Decommissioned, Retired ইত্যাদি সঠিক status দিন।
 
-**সমাধান:** ছোট ছোট ব্যাচে ইমপোর্ট করুন। প্রথমে দশটা রো দিয়ে টেস্ট করুন। ঠিকমতো কাজ করলে তারপর বড় ফাইল ইমপোর্ট করুন। আর সবসময় ব্যাকআপ রাখুন ইমপোর্ট করার আগে।
+---
 
-### মিসটেক ৯: ডেটা ভ্যালিডেশন না করা
+### Naming Convention Standards - SkyNets Bangladesh এর Example
 
-ডেটা এন্ট্রি শেষ হলে অনেকেই মনে করে কাজ শেষ। কিন্তু আসলে তখনই ভ্যালিডেশন করা উচিত।
+SkyNets Bangladesh একটা documented naming convention তৈরি করেছে। এটা একটা Word ডকুমেন্টে রাখা আছে এবং সব team members কে দেওয়া হয়েছে।
 
-**সমাধান:** Nautobot-এ কয়েকটা রিপোর্ট চালান:
+```
+========================================
+SkyNets Bangladesh Naming Convention
+Version 1.0 - Updated: February 2025
+========================================
 
-১. **সব ডিভাইস লিস্ট করুন:** দেখুন কোনো ডিভাইস ডুপ্লিকেট নেই তো, সব ডিভাইসের নাম কনভেনশন মেনে আছে তো।
+1. DEVICES
+----------
+Format: [Type]-[Zone]-[Site]-[Role]-[Number]
 
-২. **সব আইপি লিস্ট করুন:** দেখুন কোনো আনঅ্যাসাইনড আইপি নেই তো, সব আইপি সঠিক রেঞ্জে আছে তো।
+Type Codes:
+  R  = Router
+  SW = Switch
+  FW = Firewall
+  OLT = Optical Line Terminal
 
-৩. **সব ইন্টারফেস লিস্ট করুন:** দেখুন কোনো ইন্টারফেস আনকানেক্টেড রয়ে গেছে কিনা।
+Zone Codes:
+  DN = Dhaka North
+  DS = Dhaka South (future)
+  CT = Chittagong (future)
 
-৪. **ক্যাবল কানেকশন চেক করুন:** দেখুন সব লিংক সঠিকভাবে ডকুমেন্ট করা আছে তো।
+Site Codes (3 letters):
+  MIR = Mirpur
+  UTT = Uttara
+  KAL = Kalyanpur (future)
+  BAN = Banani (future)
 
-Nautobot-এর সার্চ ফিচার খুবই পাওয়ারফুল। যেমন আপনি সার্চ করতে পারেন "status:active AND role:core" - এতে সব অ্যাক্টিভ কোর ডিভাইস বের হবে।
+Role Codes:
+  CORE = Core
+  DIST = Distribution
+  ACC  = Access
+  EDGE = Edge
 
-## প্র‍্যাক্টিক্যাল এক্সারসাইজ - আপনার পালা
+Number: 01, 02, 03... (zero-padded, 2 digits)
 
-এবার আপনার পালা হাতে-কলমে কাজ করার। আরেকটা কাল্পনিক আইএসপি নিয়ে কাজ করুন। নাম দিন "SpeedNet Bangladesh"।
+Examples:
+  R-DN-MIR-CORE-01
+  SW-DN-UTT-DIST-01
+  SW-DN-MIR-ACC-15
 
-**সিনারিও:**
-- দুটো পপ: ধানমন্ডি আর বনানী
-- প্রতিটা পপে একটা কোর রাউটার, তিনটা এক্সেস সুইচ
-- সামিট থেকে প্রাইমারি আপলিংক
-- প্রায় পাঁচ হাজার রেসিডেনশিয়াল কাস্টমার
+2. INTERFACES
+-------------
+Use manufacturer's default naming.
+Add clear descriptions:
 
-**টাস্ক:**
+Format: [Purpose] - [Remote End/Details]
 
-১. দুটো লোকেশন তৈরি করুন (ধানমন্ডি পপ, বনানী পপ)
+Examples:
+  "Uplink to BTCL - 5 Gbps circuit"
+  "Link to SW-DN-MIR-DIST-01 port sfp1"
+  "Customer: ABC Corporation - VLAN 200"
 
-২. প্রতিটা লোকেশনে একটা র‍্যাক তৈরি করুন
+3. CABLES
+---------
+Format: [Source Device Type]-TO-[Dest Device Type]-[Number]
 
-৩. ডিভাইস টাইপ তৈরি করুন (MikroTik CCR2004, Cisco 2960)
+Examples:
+  CORE-TO-DIST-01
+  DIST-TO-ACC-03
+  UPLINK-BTCL-01
 
-৪. একটা কোর রাউটার তৈরি করুন ধানমন্ডি পপে
+4. IP ADDRESSES
+---------------
+Management IPs:
+  Core Routers: 10.10.X.1/24
+  Dist Switches: 10.10.X.11-20/24
+  Access Switches: 10.10.X.21-99/24
 
-৫. তিনটা এক্সেস সুইচ তৈরি করুন CSV ইমপোর্ট দিয়ে
+DNS Naming:
+  Format: [device-name].skynet.bd
+  Example: r-mir-core-01.skynet.bd
 
-৬. কয়েকটা ভিল্যান তৈরি করুন (MGMT, UPLINK, CUSTOMERS)
+5. VLANs
+--------
+Format: [Purpose]_[Site]
 
-৭. আইপি প্রিফিক্স তৈরি করুন (একটা /24 ব্লক ধরুন)
+Examples:
+  MGMT_MIRPUR
+  RESIDENTIAL_MIR
+  CORPORATE (global, no site suffix)
 
-৮. কোর রাউটারের ইন্টারফেসে ম্যানেজমেন্ট আইপি অ্যাসাইন করুন
+6. LOCATIONS
+------------
+Use full descriptive names:
+  Dhaka North Zone
+  Mirpur POP
+  Rack A
 
-এই এক্সারসাইজ করার পরে আপনি বেসিক ডেটা এন্ট্রিতে কমফোর্টেবল হয়ে যাবেন।
+Avoid abbreviations in location names.
 
-## টিপস ও ট্রিকস
+========================================
+```
 
-কয়েকটা টিপস যা আপনার কাজ সহজ করবে:
+এই document টা print করে NOC তে টাঙিয়ে রাখা আছে। নতুন কেউ join করলে তাকে এটা পড়তে দেওয়া হয়।
 
-**১. Bookmarks ইউজ করুন:** যেসব পেজে বারবার যেতে হয়, সেগুলো ব্রাউজারে বুকমার্ক করে রাখুন।
+---
 
-**২. Keyboard shortcuts শিখুন:** Nautobot-এ কিছু কিবোর্ড শর্টকাট আছে। যেমন `/` চাপলে সার্চ বক্স অ্যাক্টিভ হয়।
+### Export এবং Backup - ডেটা সংরক্ষণ
 
-**৩. Filters ইউজ করুন:** যেকোনো লিস্ট পেজে ডানদিকে ফিল্টার অপশন থাকে। এটা দিয়ে সহজে খুঁজে পাবেন যা খুঁজছেন।
+কিছু ডেটা এন্ট্রি হয়ে গেলে backup নেওয়া জরুরি।
 
-**৪. Tags ব্যবহার করুন:** গুরুত্বপূর্ণ ডিভাইসগুলোতে "Critical" ট্যাগ দিন। এতে সহজে ফিল্টার করতে পারবেন।
+#### CSV Export
 
-**৫. Comments ফিল্ড ভালোভাবে ইউজ করুন:** যেকোনো স্পেশাল নোট, ওয়ার্নিং, বা হিস্ট্রিক্যাল ইনফরমেশন Comments-এ লিখুন।
+যেকোনো object list থেকে CSV export করা যায়।
 
-**৬. CSV ব্যাকআপ রাখুন:** যখনই CSV ইমপোর্ট করবেন, সেই ফাইল সেভ করে রাখুন। পরে রেফারেন্সের জন্য কাজে লাগবে।
+**Devices → Devices** লিস্টে যান।
 
-**৭. ছবি আপলোড করুন:** অনেক অবজেক্টে ছবি আপলোড করা যায়। র‍্যাকের ফটো, ডিভাইসের ফটো আপলোড করুন। পরে হেল্পফুল হবে।
+উপরে ডান দিকে **Export** বাটন দেখবেন। ক্লিক করলে একটা ড্রপডাউন:
 
-## কি জানলাম আমরা?
+- **Export All**: সব devices
+- **Export Selected**: যেগুলো checkbox দিয়ে সিলেক্ট করেছেন
+- **Export as CSV**: CSV format
+- **Export as YAML**: YAML format
 
-এই চ্যাপ্টারে আমরা দেখলাম কীভাবে Nautobot-এর ওয়েব ইন্টারফেস ইউজ করে ডেটা এন্ট্রি করতে হয়। শুরু করলাম সাইট তৈরি করে, তারপর র‍্যাক, ডিভাইস, ইন্টারফেস, আইপি অ্যাড্রেস। দেখলাম কীভাবে ম্যানুয়াল এন্ট্রি করতে হয়, আর কীভাবে CSV দিয়ে বাল্ক ইমপোর্ট করতে হয়।
+**Export All → CSV** সিলেক্ট করুন।
 
-তারপর দেখলাম কমন মিসটেকগুলো - নেমিং কনভেনশন না মানা, রিলেশনশিপ ভুল করা, পুরোনো ডেটা না মোছা, ডেসক্রিপশন খালি রাখা। এসব এড়ানোর উপায়ও জানলাম।
+একটা CSV ফাইল ডাউনলোড হবে যেখানে সব devices এর সব information থাকবে।
 
-এখন আপনার কাছে একটা Nautobot ইনস্ট্যান্স আছে যেখানে কিছু ডেটা এন্ট্রি করা। পরের চ্যাপ্টারে আমরা দেখব কীভাবে API দিয়ে প্রোগ্রামেটিক্যালি ডেটা এন্ট্রি করতে হয়, কীভাবে Python স্ক্রিপ্ট লিখে অটোমেশন করতে হয়। তখন আপনি সত্যিকার অর্থে Nautobot-এর পাওয়ার বুঝতে পারবেন।
+এই ফাইল একটা safe জায়গায় রাখুন। যদি কখনো ভুল করে কিছু delete হয়ে যায়, এই CSV দিয়ে import করে recover করতে পারবেন।
+
+#### Monthly Data Snapshot
+
+SkyNets Bangladesh প্রতি মাসের ১ তারিখে একটা snapshot নেয়:
+
+```bash
+# Create backup directory
+mkdir -p /backup/nautobot/monthly/2025-02
+
+# Export all key data types
+# Devices
+curl -H "Authorization: Token YOUR_TOKEN" \
+  "https://nautobot.skynet.bd/api/dcim/devices/?limit=0&format=csv" \
+  > /backup/nautobot/monthly/2025-02/devices.csv
+
+# IP Addresses
+curl -H "Authorization: Token YOUR_TOKEN" \
+  "https://nautobot.skynet.bd/api/ipam/ip-addresses/?limit=0&format=csv" \
+  > /backup/nautobot/monthly/2025-02/ip-addresses.csv
+
+# (similarly for other object types)
+```
+
+এগুলো Google Drive এ backup করা হয়।
+
+---
+
+### চ্যাপ্টার সারাংশ
+
+এই চ্যাপ্টারে আমরা শিখলাম:
+
+**Location Hierarchy:**
+- Location Types তৈরি করা (Zone, Cluster, POP, Rack)
+- Actual Locations তৈরি করা
+- Hierarchy সঠিকভাবে সেটআপ করা
+
+**Roles Setup:**
+- Unified Roles সিস্টেম (Nautobot 3.0)
+- Content Types দিয়ে specify করা
+- Device roles তৈরি করা
+
+**Device Management:**
+- Manufacturers যোগ করা
+- Device Types তৈরি করা
+- Interface Templates এর গুরুত্ব
+- Actual Devices এন্ট্রি করা
+- Racks এ device position করা
+
+**IP এবং VLAN:**
+- IP Namespaces
+- Prefixes (hierarchical)
+- IP Addresses assign করা
+- VLANs তৈরি করা
+- VLAN Groups
+
+**Physical Connectivity:**
+- Cables তৈরি করা
+- Cable Trace ব্যবহার করা
+- Color coding
+
+**Upstream Connectivity:**
+- Providers
+- Circuit Types
+- Circuits
+- Circuit Terminations
+
+**Data Quality:**
+- Validation checks
+- Common mistakes এবং সমাধান
+- Naming conventions
+- Export/Backup
+
+SkyNets Bangladesh এখন তাদের মিরপুর এবং উত্তরা পপের প্রায় সম্পূর্ণ নেটওয়ার্ক Nautobot এ ডকুমেন্ট করে ফেলেছে। পরের চ্যাপ্টারে আমরা দেখব কীভাবে এই setup কে scale করা যায় যখন নতুন পপ যুক্ত হয়, আরো ডিভাইস আসে, এবং কীভাবে advanced features ব্যবহার করতে হয়।
