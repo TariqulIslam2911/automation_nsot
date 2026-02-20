@@ -1,28 +1,28 @@
 এতক্ষণ আমরা শিখলাম Nautobot-এর বিভিন্ন ফিচার - কীভাবে সাইট তৈরি করতে হয়, ডিভাইস এড করতে হয়, আইপি ম্যানেজ করতে হয়, ক্যাবল ডকুমেন্ট করতে হয়। এখন সময় এসেছে এই সব জ্ঞান একসাথে কাজে লাগানোর। এই চ্যাপ্টারে আমরা দেখব কীভাবে একটা ছোট আইএসপির জন্য শুরু থেকে শেষ পর্যন্ত Nautobot সেটআপ করতে হয়।
 
-আমাদের উদাহরণ হিসেবে থাকবে "SkyNet Bangladesh"। তারা ঢাকার নর্থ জোনে ইন্টারনেট সার্ভিস দেয়। বর্তমানে তাদের প্রায় পাঁচ হাজার রেসিডেনশিয়াল কাস্টমার আছে। দুটো পপ - একটা মিরপুরে, আরেকটা উত্তরায়। তারা এক্সেল শিট আর হাতে লেখা ডায়াগ্রাম দিয়ে নেটওয়ার্ক ম্যানেজ করছিল। এখন Nautobot-এ মুভ করার সিদ্ধান্ত নিয়েছে।
+আমাদের উদাহরণ হিসেবে থাকবে "Nirvor Communication"। তারা ঢাকার নর্থ জোনে ইন্টারনেট সার্ভিস দেয়। বর্তমানে তাদের প্রায় পাঁচ হাজার রেসিডেনশিয়াল কাস্টমার আছে। দুটো পপ - একটা মিরপুরে, আরেকটা উত্তরায়। তারা এক্সেল শিট আর হাতে লেখা ডায়াগ্রাম দিয়ে নেটওয়ার্ক ম্যানেজ করছিল। এখন Nautobot-এ মুভ করার সিদ্ধান্ত নিয়েছে।
 
 ### শুরুর আগে - পরিকল্পনা করা
 
 Nautobot-এ ডেটা এন্ট্রি শুরু করার আগে একটা পরিকল্পনা করা জরুরি। না হলে মাঝপথে গিয়ে দেখবেন গোলমাল হয়ে গেছে, আবার নতুন করে শুরু করতে হচ্ছে।
 
-### SkyNet-এর বর্তমান নেটওয়ার্ক পরিস্থিতি
+### Nirvor -এর বর্তমান নেটওয়ার্ক পরিস্থিতি
 
-আমরা প্রথমে দেখি SkyNet-এর নেটওয়ার্ক কেমন:
+আমরা প্রথমে দেখি Nirvor -এর নেটওয়ার্ক কেমন:
 
 **মিরপুর পপ:**
 
-- ১টা কোর রাউটার (MikroTik CCR2004)
-- ২টা ডিস্ট্রিবিউশন সুইচ (TP-Link TL-SG3428)
-- ১০টা এক্সেস সুইচ (TP-Link TL-SG1024D)
+- ১টা কোর রাউটার (MikroTik CCR2116)
+- ২টা ডিস্ট্রিবিউশন সুইচ (TP-Link TL-SX3016F)
+- ১০টা এক্সেস সুইচ (TP-Link TL-SG3428MP)
 - আনুমানিক ৩ হাজার কাস্টমার
 - BTCL থেকে ৫ Gbps আপলিংক
 
 **উত্তরা পপ:**
 
-- ১টা কোর রাউটার (MikroTik CCR2004)
-- ১টা ডিস্ট্রিবিউশন সুইচ (TP-Link TL-SG3428)
-- ৬টা এক্সেস সুইচ (TP-Link TL-SG1024D)
+- ১টা কোর রাউটার (MikroTik CCR2116)
+- ১টা ডিস্ট্রিবিউশন সুইচ (TP-Link TL-SX3016F)
+- ৬টা এক্সেস সুইচ (TP-Link TL-SG3428MP)
 - আনুমানিক ২ হাজার কাস্টমার
 - Summit থেকে ৩ Gbps আপলিংক
 
@@ -33,7 +33,7 @@ Nautobot-এ ডেটা এন্ট্রি শুরু করার আগ
 
 ### নেমিং কনভেনশন ডিফাইন করা
 
-সবার আগে একটা নেমিং কনভেনশন ঠিক করে ফেলি। SkyNet-এর জন্য এই স্ট্যান্ডার্ড:
+সবার আগে একটা নেমিং কনভেনশন ঠিক করে ফেলি। Nirvor -এর জন্য এই স্ট্যান্ডার্ড:
 
 **ডিভাইস নেমিং:**
 ```
@@ -119,7 +119,7 @@ Latitude: 23.8103
 Longitude: 90.3654
 Contact Name: Jahangir Khan
 Contact Phone: +880 1712-345678
-Contact Email: jahangir@skynet.bd
+Contact Email: jahangir@Nirvor.bd
 Description: Primary POP serving Mirpur area. Approximately 3000 residential customers.
 ```
 
@@ -134,7 +134,7 @@ Latitude: 23.7765
 Longitude: 90.3568
 Contact Name: Asif Rahman
 Contact Phone: +880 1811-234567
-Contact Email: asif@skynet.bd
+Contact Email: asif@Nirvor.bd
 Description: Secondary POP serving Uttara area. Approximately 2000 residential customers.
 ```
 
@@ -172,10 +172,10 @@ Height: 42U
 
 **Device Types:**
 
-MikroTik CCR2004:
+MikroTik CCR2116:
 ```
 Manufacturer: MikroTik
-Model: CCR2004-1G-12S+2XS
+Model: CCR2116-12G-4S+
 Height: 1U
 Is Full Depth: ✓
 Description: Cloud Core Router
@@ -184,37 +184,36 @@ Description: Cloud Core Router
 TP-Link Managed Switch:
 ```
 Manufacturer: TP-Link
-Model: TL-SG3428
+Model: TL-SX3016F
 Height: 1U
 Is Full Depth: ✓
-Description: 28-Port Gigabit L2+ Managed Switch
+Description: TP-Link TL-SX3016F JetStream 16-Port 10GE SFP+ L2+ Managed Switch
 ```
 
-TP-Link Unmanaged Switch:
+TP-Link managed Switch:
 ```
 Manufacturer: TP-Link
-Model: TL-SG1024D
+Model: TL-SG3428MP
 Height: 1U
 Is Full Depth: ✓
-Description: 24-Port Gigabit Unmanaged Switch
+Description: TP-Link TL-SG3428MP JetStream 28-Port Gigabit L2+ Managed Switch with 24-Port PoE+
 ```
 
 **Interface Templates যোগ করুন** (গুরুত্বপূর্ণ):
 
-MikroTik CCR2004-এর জন্য:
+MikroTik CCR2116-এর জন্য:
 
 - ether1 (1000BASE-T)
-- sfp-sfpplus1 থেকে sfp-sfpplus12 (10GBASE-X-SFP+)
-- sfp28-1, sfp28-2 (25GBASE-X-SFP28)
+- sfp-sfpplus1 থেকে sfp-sfpplus4 (10GBASE-X-SFP+)
 
-TP-Link TL-SG3428-এর জন্য:
-
-- ether1 থেকে ether24 (1000BASE-T)
-- sfp1 থেকে sfp4 (1000BASE-X-SFP)
-
-TP-Link TL-SG1024D-এর জন্য:
+TP-Link TL-SX3016F-এর জন্য:
 
 - ether1 থেকে ether24 (1000BASE-T)
+- sfp1 থেকে sfp4 (10000BASE-X-SFP)
+
+TP-Link TL-SG3428MP-এর জন্য:
+
+- ether1 থেকে ether16 (1000BASE-T)
 
 ### দিন ৫: Device Roles এবং Tags
 
@@ -248,7 +247,7 @@ TP-Link TL-SG1024D-এর জন্য:
 ```
 Name: BTCL
 ASN: 17494
-Account Number: SKY-BTCL-2023-MIR
+Account Number: Nirvor-BTCL-2023-MIR
 Portal URL: https://isp.btcl.gov.bd
 NOC Contact: +880 2-9555555
 Admin Contact: noc@btcl.gov.bd
@@ -298,7 +297,7 @@ PP Info: BTCL-PP-MIR-12
 
 ```
 Name: R-MIR-CORE-01
-Device Type: MikroTik CCR2004-1G-12S+2XS
+Device Type: MikroTik CCR2116-12G-4S+
 Role: Core Router
 Location: Mirpur POP
 Rack: Rack-MIR-A
@@ -306,7 +305,7 @@ Position: 25U
 Face: Front
 Status: Active
 Serial Number: ABC1234MIR001
-Asset Tag: SKY-RTR-001
+Asset Tag: Nirvor-RTR-001
 Tags: Production, Critical
 Description: Primary core router for Mirpur POP
 Comments:
@@ -335,8 +334,8 @@ CSV দিয়ে একসাথে এড করুন (`mirpur-dist-switche
 
 ```csv
 name,device_type,role,location,rack,position,status,serial,asset_tag,tags,description
-SW-MIR-DIST-01,TP-Link TL-SG3428,Distribution Switch,Mirpur POP,Rack-MIR-A,20,Active,TPL1234DIST01,SKY-SW-001,production,"Primary distribution switch"
-SW-MIR-DIST-02,TP-Link TL-SG3428,Distribution Switch,Mirpur POP,Rack-MIR-A,19,Active,TPL1234DIST02,SKY-SW-002,production,"Secondary distribution switch"
+SW-MIR-DIST-01,TP-Link TL-SX3016F,Distribution Switch,Mirpur POP,Rack-MIR-A,20,Active,TPL1234DIST01,Nirvor-SW-001,production,"Primary distribution switch"
+SW-MIR-DIST-02,TP-Link TL-SX3016F,Distribution Switch,Mirpur POP,Rack-MIR-A,19,Active,TPL1234DIST02,Nirvor-SW-002,production,"Secondary distribution switch"
 ```
 
 ### দিন ১০: এক্সেস সুইচ (১০টা)
@@ -345,16 +344,16 @@ CSV ফাইল (`mirpur-access-switches.csv`):
 
 ```csv
 name,device_type,role,location,rack,position,status,serial,asset_tag,tags,description
-SW-MIR-ACC-01,TP-Link TL-SG1024D,Access Switch,Mirpur POP,Rack-MIR-A,15,Active,TPLACC001,SKY-SW-011,production,"Building-A access"
-SW-MIR-ACC-02,TP-Link TL-SG1024D,Access Switch,Mirpur POP,Rack-MIR-A,14,Active,TPLACC002,SKY-SW-012,production,"Building-B access"
-SW-MIR-ACC-03,TP-Link TL-SG1024D,Access Switch,Mirpur POP,Rack-MIR-A,13,Active,TPLACC003,SKY-SW-013,production,"Building-C access"
-SW-MIR-ACC-04,TP-Link TL-SG1024D,Access Switch,Mirpur POP,Rack-MIR-A,12,Active,TPLACC004,SKY-SW-014,production,"Building-D access"
-SW-MIR-ACC-05,TP-Link TL-SG1024D,Access Switch,Mirpur POP,Rack-MIR-A,11,Active,TPLACC005,SKY-SW-015,production,"Building-E access"
-SW-MIR-ACC-06,TP-Link TL-SG1024D,Access Switch,Mirpur POP,Rack-MIR-A,10,Active,TPLACC006,SKY-SW-016,production,"Building-F access"
-SW-MIR-ACC-07,TP-Link TL-SG1024D,Access Switch,Mirpur POP,Rack-MIR-A,9,Active,TPLACC007,SKY-SW-017,production,"Building-G access"
-SW-MIR-ACC-08,TP-Link TL-SG1024D,Access Switch,Mirpur POP,Rack-MIR-A,8,Active,TPLACC008,SKY-SW-018,production,"Building-H access"
-SW-MIR-ACC-09,TP-Link TL-SG1024D,Access Switch,Mirpur POP,Rack-MIR-A,7,Active,TPLACC009,SKY-SW-019,production,"Building-I access"
-SW-MIR-ACC-10,TP-Link TL-SG1024D,Access Switch,Mirpur POP,Rack-MIR-A,6,Active,TPLACC010,SKY-SW-020,production,"Building-J access"
+SW-MIR-ACC-01,TP-Link TL-SG3428MP,Access Switch,Mirpur POP,Rack-MIR-A,15,Active,TPLACC001,Nirvor-SW-011,production,"Building-A access"
+SW-MIR-ACC-02,TP-Link TL-SG3428MP,Access Switch,Mirpur POP,Rack-MIR-A,14,Active,TPLACC002,Nirvor-SW-012,production,"Building-B access"
+SW-MIR-ACC-03,TP-Link TL-SG3428MP,Access Switch,Mirpur POP,Rack-MIR-A,13,Active,TPLACC003,Nirvor-SW-013,production,"Building-C access"
+SW-MIR-ACC-04,TP-Link TL-SG3428MP,Access Switch,Mirpur POP,Rack-MIR-A,12,Active,TPLACC004,Nirvor-SW-014,production,"Building-D access"
+SW-MIR-ACC-05,TP-Link TL-SG3428MP,Access Switch,Mirpur POP,Rack-MIR-A,11,Active,TPLACC005,Nirvor-SW-015,production,"Building-E access"
+SW-MIR-ACC-06,TP-Link TL-SG3428MP,Access Switch,Mirpur POP,Rack-MIR-A,10,Active,TPLACC006,Nirvor-SW-016,production,"Building-F access"
+SW-MIR-ACC-07,TP-Link TL-SG3428MP,Access Switch,Mirpur POP,Rack-MIR-A,9,Active,TPLACC007,Nirvor-SW-017,production,"Building-G access"
+SW-MIR-ACC-08,TP-Link TL-SG3428MP,Access Switch,Mirpur POP,Rack-MIR-A,8,Active,TPLACC008,Nirvor-SW-018,production,"Building-H access"
+SW-MIR-ACC-09,TP-Link TL-SG3428MP,Access Switch,Mirpur POP,Rack-MIR-A,7,Active,TPLACC009,Nirvor-SW-019,production,"Building-I access"
+SW-MIR-ACC-10,TP-Link TL-SG3428MP,Access Switch,Mirpur POP,Rack-MIR-A,6,Active,TPLACC010,Nirvor-SW-020,production,"Building-J access"
 ```
 
 এই CSV ইমপোর্ট করুন। দশটা সুইচ একসাথে তৈরি হয়ে যাবে।
@@ -409,7 +408,7 @@ Cable 3:
 
 ```
 Name: Global
-Description: Primary IP namespace for SkyNet Bangladesh
+Description: Primary IP namespace for Nirvor Communication
 ```
 
 **Parent Prefix (পাবলিক আইপি):**
@@ -528,7 +527,7 @@ IP Address: 10.10.1.1/32
 Status: Active
 Role: Loopback
 Assigned to: R-MIR-CORE-01, Interface: lo0
-DNS Name: r-mir-core-01.skynet.bd
+DNS Name: r-mir-core-01.Nirvor.bd
 Description: Management loopback
 ```
 
@@ -538,7 +537,7 @@ IP Address: 103.125.42.130/30
 Status: Active
 Role: Infrastructure
 Assigned to: R-MIR-CORE-01, Interface: sfp-sfpplus1
-DNS Name: r-mir-core-01-uplink.skynet.bd
+DNS Name: r-mir-core-01-uplink.Nirvor.bd
 Description: BTCL uplink IP
 ```
 
@@ -558,7 +557,7 @@ SW-MIR-DIST-01:
 IP Address: 10.10.10.11/24
 Status: Active
 Assigned to: SW-MIR-DIST-01, Interface: vlan10
-DNS Name: sw-mir-dist-01.skynet.bd
+DNS Name: sw-mir-dist-01.Nirvor.bd
 ```
 
 SW-MIR-DIST-02:
@@ -566,7 +565,7 @@ SW-MIR-DIST-02:
 IP Address: 10.10.10.12/24
 Status: Active
 Assigned to: SW-MIR-DIST-02, Interface: vlan10
-DNS Name: sw-mir-dist-02.skynet.bd
+DNS Name: sw-mir-dist-02.Nirvor.bd
 ```
 
 **এক্সেস সুইচ (১০টা):**
@@ -575,16 +574,16 @@ CSV দিয়ে করা যায়:
 
 ```csv
 address,status,assigned_object_type,assigned_object,dns_name,description
-10.10.10.21/24,Active,dcim.interface,SW-MIR-ACC-01:vlan10,sw-mir-acc-01.skynet.bd,Management IP
-10.10.10.22/24,Active,dcim.interface,SW-MIR-ACC-02:vlan10,sw-mir-acc-02.skynet.bd,Management IP
-10.10.10.23/24,Active,dcim.interface,SW-MIR-ACC-03:vlan10,sw-mir-acc-03.skynet.bd,Management IP
-10.10.10.24/24,Active,dcim.interface,SW-MIR-ACC-04:vlan10,sw-mir-acc-04.skynet.bd,Management IP
-10.10.10.25/24,Active,dcim.interface,SW-MIR-ACC-05:vlan10,sw-mir-acc-05.skynet.bd,Management IP
-10.10.10.26/24,Active,dcim.interface,SW-MIR-ACC-06:vlan10,sw-mir-acc-06.skynet.bd,Management IP
-10.10.10.27/24,Active,dcim.interface,SW-MIR-ACC-07:vlan10,sw-mir-acc-07.skynet.bd,Management IP
-10.10.10.28/24,Active,dcim.interface,SW-MIR-ACC-08:vlan10,sw-mir-acc-08.skynet.bd,Management IP
-10.10.10.29/24,Active,dcim.interface,SW-MIR-ACC-09:vlan10,sw-mir-acc-09.skynet.bd,Management IP
-10.10.10.30/24,Active,dcim.interface,SW-MIR-ACC-10:vlan10,sw-mir-acc-10.skynet.bd,Management IP
+10.10.10.21/24,Active,dcim.interface,SW-MIR-ACC-01:vlan10,sw-mir-acc-01.Nirvor.bd,Management IP
+10.10.10.22/24,Active,dcim.interface,SW-MIR-ACC-02:vlan10,sw-mir-acc-02.Nirvor.bd,Management IP
+10.10.10.23/24,Active,dcim.interface,SW-MIR-ACC-03:vlan10,sw-mir-acc-03.Nirvor.bd,Management IP
+10.10.10.24/24,Active,dcim.interface,SW-MIR-ACC-04:vlan10,sw-mir-acc-04.Nirvor.bd,Management IP
+10.10.10.25/24,Active,dcim.interface,SW-MIR-ACC-05:vlan10,sw-mir-acc-05.Nirvor.bd,Management IP
+10.10.10.26/24,Active,dcim.interface,SW-MIR-ACC-06:vlan10,sw-mir-acc-06.Nirvor.bd,Management IP
+10.10.10.27/24,Active,dcim.interface,SW-MIR-ACC-07:vlan10,sw-mir-acc-07.Nirvor.bd,Management IP
+10.10.10.28/24,Active,dcim.interface,SW-MIR-ACC-08:vlan10,sw-mir-acc-08.Nirvor.bd,Management IP
+10.10.10.29/24,Active,dcim.interface,SW-MIR-ACC-09:vlan10,sw-mir-acc-09.Nirvor.bd,Management IP
+10.10.10.30/24,Active,dcim.interface,SW-MIR-ACC-10:vlan10,sw-mir-acc-10.Nirvor.bd,Management IP
 ```
 
 ### সপ্তাহ ৪: উত্তরা পপ (দ্রুততর)
@@ -606,9 +605,9 @@ Monthly Cost: BDT 250,000
 **ডিভাইস:**
 
 ```
-R-UTT-CORE-01 (MikroTik CCR2004)
-SW-UTT-DIST-01 (TP-Link TL-SG3428)
-SW-UTT-ACC-01 to SW-UTT-ACC-06 (TP-Link TL-SG1024D)
+R-UTT-CORE-01 (MikroTik CCR2116)
+SW-UTT-DIST-01 (TP-Link TL-SX3016F)
+SW-UTT-ACC-01 to SW-UTT-ACC-06 (TP-Link TL-SG3428MP)
 ```
 
 CSV দিয়ে সব ডিভাইস একসাথে ইমপোর্ট করুন।
@@ -631,7 +630,7 @@ Management Network: 10.10.10.50-60 range
 
 ### Custom Fields যোগ করা
 
-SkyNet-এর জন্য কিছু দরকারি Custom Fields:
+Nirvor -এর জন্য কিছু দরকারি Custom Fields:
 
 ### Warranty Tracking
 
@@ -680,7 +679,7 @@ Description: Approximate number of customers served by this device
 
 ### User এবং Permission সেটআপ
 
-SkyNet-এর তিনজন টেকনিশিয়ান আছে:
+Nirvor -এর তিনজন টেকনিশিয়ান আছে:
 
 **১. জাহাঙ্গীর (সিনিয়র নেটওয়ার্ক এডমিন):**
 
@@ -771,7 +770,7 @@ Nautobot-এ সব ডেটা আছে, কিন্তু একটা স�
 একটা ওয়ার্ড ডকুমেন্ট বা PDF বানান:
 
 ```
-SkyNet Bangladesh - Network Documentation
+Nirvor Communication - Network Documentation
 Generated: [Date]
 
 1. Network Overview
@@ -801,7 +800,7 @@ Generated: [Date]
    - Kalyanpur: Asif Rahman (+880 18xx-234567)
 
 5. Nautobot Access
-   - URL: https://nautobot.skynet.bd
+   - URL: https://nautobot.Nirvor .bd
    - Admin: [credentials stored securely]
 ```
 
@@ -898,6 +897,6 @@ Generated: [Date]
 
  **রিপোর্টিং চালু:** মাসিক রিপোর্ট Nautobot থেকে জেনারেট হয়
 
-এই সব হয়ে গেলে বুঝবেন SkyNet Bangladesh একটা প্রপার NSoT ইমপ্লিমেন্ট করে ফেলেছে। এখন তারা রেডি পরের লেভেলে যাওয়ার জন্য - ৫০ হাজার কাস্টমারে স্কেল করা।
+এই সব হয়ে গেলে বুঝবেন Nirvor Communication একটা প্রপার NSoT ইমপ্লিমেন্ট করে ফেলেছে। এখন তারা রেডি পরের লেভেলে যাওয়ার জন্য - ৫০ হাজার কাস্টমারে স্কেল করা।
 
 পরের চ্যাপ্টারে আমরা দেখব মিডিয়াম আইএসপি (৫০ হাজার কাস্টমার) কীভাবে Nautobot ম্যানেজ করে, কী কী নতুন চ্যালেঞ্জ আসে, আর কীভাবে সেগুলো সামলানো যায়।
